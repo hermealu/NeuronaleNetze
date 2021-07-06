@@ -4,6 +4,10 @@ tanh <- function(x){
   return((exp(2*x)-1)/(exp(2*x)+1))
 }
 
+del_tanh <- function(x){
+  return(4/((exp(-x)+exp(x))^2))
+}
+
 NN <- R6Class("NN", list(
   L = 1, #Anzahl der Layer
   B = c(1), #Breite der einzelnen Layer 
@@ -57,22 +61,39 @@ NN <- R6Class("NN", list(
   },
   
   #Durchführen eines Gradientdescends
-  GD = function(x,y,lambda=1,stepsize=1e-4){
+  GD = function(x,y,lambda=1,stepsize=1e-4,iterations=100){
     n <- length(x)
     R1 <- 1/n * sum((y-self$calculate(x))^2)
-    #for (i in 1:100){ #hier probiere ich nur rum
-      
-    #}
+    for (i in 1:iterations){ 
+      self$W[["A"]] <- self$W[["A"]] + 1e-3 * x[i] * (y[i]-self$calculate(x[i])) 
+    }
+    R2 <- 1/n * sum((y-self$calculate(x))^2)
   }
   )
 )
 
 
 
-N1 <- NN$new(1,c(1,4,1))Funktion
-N1$GD(x,x)
-x <- seq(-10,10,0.001)
+N1 <- NN$new(0,c(1,1))
+x <- seq(-10,10,0.1)
 y <- N1$calculate(x)
-plot(x,y,)
-N1$d
+plot(1,1,xlim=c(-10,10),ylim=c(-10,10))
+lines(x,y,type="l",col="red")
+xs <- sample(x)
+N1$GD(xs,xs,iterations=25)
+y <- N1$calculate(x)
+lines(x,y,col="blue")
+N1$GD(xs,xs,iterations=50)
+y <- N1$calculate(x)
+lines(x,y,col="green")
+N1$GD(xs,xs,iterations=100)
+y <- N1$calculate(x)
+lines(x,y,col="black")
+N1$GD(xs,xs,iterations=200)
+y <- N1$calculate(x)
+lines(x,y,col="orange")
+lines(x,x,col="purple")
+legend(-10, 5, legend=c("start", "25 Schritte","50 Schritte","100 Schritte","200 Schritte","echte funktion"),
+       col=c("red", "blue","green","black","orange","purple"),lty=1,  cex=0.8)
+N1$W
 N1$J
