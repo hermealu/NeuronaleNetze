@@ -4,6 +4,14 @@ tanh <- function(x){
   return((exp(2*x)-1)/(exp(2*x)+1))
 }
 
+sigmoid <- function(x){
+  return(1/(1+exp(-x)))
+}
+
+del_sigmoid <- function(x){
+  return(sigmoid(x)(1-sigmoid(x)))
+}
+
 del_tanh <- function(x){
   return(4/((exp(-x)+exp(x))^2))
 }
@@ -15,7 +23,7 @@ NN <- R6Class("NN", list(
   d = c(1), #List der Affinen Vektoren
   J = 0,
   theta = c(1,1),
-  f = tanh,
+  f = sigmoid,
   
   initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1),d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
     stopifnot(length(B) == L+2)
@@ -60,6 +68,20 @@ NN <- R6Class("NN", list(
     return(x)
   },
   
+  eval_till_layer = function(x=1,Layer=1){
+    if (Layer == self$L +1){
+      x <- self$calculate(x)
+    }
+    if (self$L >= 1){
+      for (i in LETTERS[1:(Layer)]){
+        x <- self$f(self$d[[i]] + x %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
+      }
+    }
+    
+      
+    return(x)
+  },
+  
   #Durchführen eines Gradientdescends
   GD = function(x,y,lambda=1,stepsize=1e-4,iterations=100){
     n <- length(x)
@@ -68,32 +90,47 @@ NN <- R6Class("NN", list(
       self$W[["A"]] <- self$W[["A"]] + 1e-3 * x[i] * (y[i]-self$calculate(x[i])) 
     }
     R2 <- 1/n * sum((y-self$calculate(x))^2)
+  },
+  
+  GD2 = function(x,y,lambda=1,stepsize=1e-4,iterations=100){
+    n <- length(x)
+    for (i in 1:n){
+      self$W[[LETTERS[self$L+1]]] <- self$W[[LETTERS[self$L+1]]] + t(0.1*self$eval_till_layer(x[i],self$L)*(y[i]-self$calculate(x[i])))
+      self$W[[LETTERS[self$L]]] <- self$W[[LETTERS[self$L]]] + 0.1*t(self$W[[LETTERS[self$L+1]]])*self$eval_till_layer(x[i],self$L)*(y[i]-self$calculate(x[i]))
+    }
+    
+    
+    
   }
   )
 )
 
 
 
-N1 <- NN$new(0,c(1,1))
-x <- seq(-10,10,0.1)
-y <- N1$calculate(x)
-plot(1,1,xlim=c(-10,10),ylim=c(-10,10))
-lines(x,y,type="l",col="red")
-xs <- sample(x)
-N1$GD(xs,xs,iterations=25)
-y <- N1$calculate(x)
-lines(x,y,col="blue")
-N1$GD(xs,xs,iterations=50)
-y <- N1$calculate(x)
-lines(x,y,col="green")
-N1$GD(xs,xs,iterations=100)
-y <- N1$calculate(x)
-lines(x,y,col="black")
-N1$GD(xs,xs,iterations=200)
-y <- N1$calculate(x)
-lines(x,y,col="orange")
-lines(x,x,col="purple")
-legend(-10, 5, legend=c("start", "25 Schritte","50 Schritte","100 Schritte","200 Schritte","echte funktion"),
-       col=c("red", "blue","green","black","orange","purple"),lty=1,  cex=0.8)
-N1$W
-N1$J
+N1 <- NN$new(1,c(1,30,1))
+
+
+
+
+
+
+#plot(1,1,xlim=c(-10,10),ylim=c(-10,10))
+#lines(x,y,type="l",col="red")
+#xs <- sample(x)
+#N1$GD(xs,xs,iterations=25)
+#y <- N1$calculate(x)
+#lines(x,y,col="blue")
+#N1$GD(xs,xs,iterations=50)
+#y <- N1$calculate(x)
+#lines(x,y,col="green")
+#N1$GD(xs,xs,iterations=100)
+#y <- N1$calculate(x)
+#lines(x,y,col="black")
+#N1$GD(xs,xs,iterations=200)
+#y <- N1$calculate(x)
+#lines(x,y,col="orange")
+#lines(x,x,col="purple")
+#legend(-10, 5, legend=c("start", "25 Schritte","50 Schritte","100 Schritte","200 Schritte","echte funktion"),
+#       col=c("red", "blue","green","black","orange","purple"),lty=1,  cex=0.8)
+#N1$W
+#N1$J
