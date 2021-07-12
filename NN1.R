@@ -16,6 +16,10 @@ del_tanh <- function(x){
   return(4/((exp(-x)+exp(x))^2))
 }
 
+id <- function(x){
+  return(x)
+}
+
 NN <- R6Class("NN", list(
   L = 1, #Anzahl der Layer
   B = c(1), #Breite der einzelnen Layer 
@@ -98,31 +102,60 @@ NN <- R6Class("NN", list(
       self$W[[LETTERS[self$L+1]]] <- self$W[[LETTERS[self$L+1]]] + t(0.1*self$eval_till_layer(x[i],self$L)*(y[i]-self$calculate(x[i])))
       self$W[[LETTERS[self$L]]] <- self$W[[LETTERS[self$L]]] + 0.1*t(self$W[[LETTERS[self$L+1]]])*self$eval_till_layer(x[i],self$L)*(y[i]-self$calculate(x[i]))
     }
-    
-    
-    
+  },
+  GD3 = function(x,y,iteration=10,delta=0.02){
+      for (j in 1:iteration){
+        W_tmp <- vector(mode="list",length=self$L+1)
+        names(W_tmp) <- LETTERS[1:(self$L+1)]
+        d_tmp <- vector(mode="list",length=self$L+1)
+        names(d_tmp) <- LETTERS[1:(self$L+1)]
+        R1 <- sum((y-self$calculate(x))^2)
+        for (k in 1:(self$L +1)){
+          W_tmp[[LETTERS[k]]] <- self$W[[LETTERS[k]]]
+          for (l in 1:length(self$W[[LETTERS[k]]])){
+            self$W[[LETTERS[k]]][l] <- self$W[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
+          }
+          d_tmp[[LETTERS[k]]] <- self$d[[LETTERS[k]]]
+          for (l in 1:length(self$d[[LETTERS[k]]])){
+            self$d[[LETTERS[k]]][l] <- self$d[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
+          }
+        }
+        R2 <- sum((y-self$calculate(x))^2)
+        if (R1 < R2){
+          self$W <- W_tmp
+          self$d <- d_tmp
+          
+        }
+        
+        print(R1)
+        print(R2)
+        if (j %% 10){
+          print(j/10)
+        }
+      }
+
   }
   )
 )
 
 
 
-N1 <- NN$new(1,c(1,30,1))
+N1 <- NN$new(4,c(1,50,50,50,50,1)) 
 
 
+x <- seq(-2*pi,2*pi,.01) 
+y_ <- sin(x) + runif(length(seq(-2*pi,2*pi,.01)),min=-0.3,max=0.3)
+
+plot(1,1,xlim=c(-2*pi,2*pi),ylim=c(-2,2))
+lines(x,y_,type="l",col="red")
+y <- N1$calculate(x)
+lines(x,y,col="blue")
 
 
+N1$GD3(x,y_,1000,0.005)
+y <- N1$calculate(x)
+lines(x,y,col="black") 
 
-
-#plot(1,1,xlim=c(-10,10),ylim=c(-10,10))
-#lines(x,y,type="l",col="red")
-#xs <- sample(x)
-#N1$GD(xs,xs,iterations=25)
-#y <- N1$calculate(x)
-#lines(x,y,col="blue")
-#N1$GD(xs,xs,iterations=50)
-#y <- N1$calculate(x)
-#lines(x,y,col="green")
 #N1$GD(xs,xs,iterations=100)
 #y <- N1$calculate(x)
 #lines(x,y,col="black")
