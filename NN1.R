@@ -76,7 +76,7 @@ NN <- R6Class("NN", list(
   },
   calculate2 = function(x=1){
     if (is.array(x)){
-      y <- matrix(1:(dim(x)[2]),nrow=dim(x)[2])
+      y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
       for (j in (1:(dim(x)[2]))){
         h <- x[,j]
         if (self$L >= 1){
@@ -85,7 +85,8 @@ NN <- R6Class("NN", list(
           }
         }  
         h <- self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]]
-        y[j] <- h
+        
+        y[j,] <- h
       }  
       return(y)
     }
@@ -171,13 +172,14 @@ NN <- R6Class("NN", list(
 
 
 
-N1 <- NN$new(3,c(2,50,50,50,1)) 
-x_1 <- seq(-1,1,2/101)
-x_2 <- seq(0,10,10/101)
+N1 <- NN$new(3,c(2,50,50,50,2)) 
+x_1 <- seq(-1,1,2/3)
+x_2 <- seq(0,10,10/3)
 x_3 <- x_1 * x_2
 x <- matrix(x_1,nrow=1)
 x <- rbind(x,x_2)
 
+N1$calculate2(x)
 
 plot(1,1,xlim=c(-1,1),ylim=c(-2,12))
 lines(x_1,x_1,type="l",col="red")
