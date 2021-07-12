@@ -21,7 +21,7 @@ id <- function(x){
 }
 
 NN <- R6Class("NN", list(
-  L = 1, #Anzahl der Layer
+  L = 1, #Anzahl der Hidden Layer
   B = c(1), #Breite der einzelnen Layer 
   W = c(1,1), #Liste soll Länge der dim haben und Einträge sind Matrizen W 
   d = c(1), #List der Affinen Vektoren
@@ -54,11 +54,42 @@ NN <- R6Class("NN", list(
     }
     
     #Erstellen der theta
-    
+    for(i in 1:L){
+      self$theta[i] <- list(c(unlist(self$W[i]), unlist(self$d[i])))
+    }
+    self$theta[L+1] <- self$W[L+1]
     
   },
   #calculate führt die funktion des NN aus 
   calculate = function(x=1){
+    for (j in (1:length(x))){
+      h <- x[j]
+      if (self$L >= 1){
+        for (i in LETTERS[1:(self$L)]){
+          h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
+        }
+      }  
+      h <- self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]]
+      x[j] <- h
+    }  
+    return(x)
+  },
+  calculate2 = function(x=1){
+    if (is.array(x)){
+      y <- matrix(1:(dim(x)[2]),nrow=dim(x)[2])
+      for (j in (1:(dim(x)[2]))){
+        h <- x[,j]
+        if (self$L >= 1){
+          for (i in LETTERS[1:(self$L)]){
+            h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
+          }
+        }  
+        h <- self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]]
+        y[j] <- h
+      }  
+      return(y)
+    }
+    
     for (j in (1:length(x))){
       h <- x[j]
       if (self$L >= 1){
@@ -109,7 +140,7 @@ NN <- R6Class("NN", list(
         names(W_tmp) <- LETTERS[1:(self$L+1)]
         d_tmp <- vector(mode="list",length=self$L+1)
         names(d_tmp) <- LETTERS[1:(self$L+1)]
-        R1 <- sum((y-self$calculate(x))^2)
+        R1 <- sum((y-self$calculate2(x))^2)
         for (k in 1:(self$L +1)){
           W_tmp[[LETTERS[k]]] <- self$W[[LETTERS[k]]]
           for (l in 1:length(self$W[[LETTERS[k]]])){
@@ -120,7 +151,7 @@ NN <- R6Class("NN", list(
             self$d[[LETTERS[k]]][l] <- self$d[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
           }
         }
-        R2 <- sum((y-self$calculate(x))^2)
+        R2 <- sum((y-self$calculate2(x))^2)
         if (R1 < R2){
           self$W <- W_tmp
           self$d <- d_tmp
@@ -140,21 +171,28 @@ NN <- R6Class("NN", list(
 
 
 
-N1 <- NN$new(4,c(1,50,50,50,50,1)) 
+N1 <- NN$new(3,c(2,50,50,50,1)) 
+x_1 <- seq(-1,1,2/101)
+x_2 <- seq(0,10,10/101)
+x_3 <- x_1 * x_2
+x <- matrix(x_1,nrow=1)
+x <- rbind(x,x_2)
 
 
-x <- seq(-2*pi,2*pi,.01) 
-y_ <- sin(x) + runif(length(seq(-2*pi,2*pi,.01)),min=-0.3,max=0.3)
+plot(1,1,xlim=c(-1,1),ylim=c(-2,12))
+lines(x_1,x_1,type="l",col="red")
+lines(x_1,x_2,type="l",col="red")
+lines(x_1,x_3,type="l",col="black")
 
-plot(1,1,xlim=c(-2*pi,2*pi),ylim=c(-2,2))
-lines(x,y_,type="l",col="red")
-y <- N1$calculate(x)
-lines(x,y,col="blue")
+y <- N1$calculate2(x) 
+lines(x_1,y,col="blue")
+
+N1$GD3(x,x_3,1000,0.01)
+y <- N1$calculate2(x) 
+lines(x_1,y,col="orange")
 
 
-N1$GD3(x,y_,1000,0.005)
-y <- N1$calculate(x)
-lines(x,y,col="black") 
+
 
 #N1$GD(xs,xs,iterations=100)
 #y <- N1$calculate(x)
