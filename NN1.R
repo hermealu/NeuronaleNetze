@@ -1,4 +1,12 @@
 library(R6)
+library(readr)
+library(stringr)
+library(dplyr)
+
+
+softmax <- function(x){
+  return(1/sum(exp(x))*exp(x))
+}
 
 tanh <- function(x){
   return((exp(2*x)-1)/(exp(2*x)+1))
@@ -103,6 +111,36 @@ NN <- R6Class("NN", list(
     }  
     return(x)
   },
+  cal_clas = function(x=1){
+    if (is.array(x)){
+      y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
+      for (j in (1:(dim(x)[2]))){
+        h <- x[,j]
+        if (self$L >= 1){
+          for (i in LETTERS[1:(self$L)]){
+            h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
+          }
+        }  
+        h <- softmax(self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]])
+        
+        y[j,] <- h
+      }  
+      return(y)
+    }
+    
+    y <- matrix(1,nrow=length(x),ncol=self$B[self$L+2])
+    for (j in (1:length(x))){
+      h <- x[j]
+      if (self$L >= 1){
+        for (i in LETTERS[1:(self$L)]){
+          h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
+        }
+      }  
+      h <- softmax(self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]])
+      y[j,] <- h
+    }  
+    return(y)
+  },
   
   eval_till_layer = function(x=1,Layer=1){
     if (Layer == self$L +1){
@@ -113,8 +151,6 @@ NN <- R6Class("NN", list(
         x <- self$f(self$d[[i]] + x %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
       }
     }
-    
-      
     return(x)
   },
   
@@ -166,32 +202,96 @@ NN <- R6Class("NN", list(
         }
       }
 
+  },
+  GD_clas = function(x,y,iteration=1000,delta=0.002){
+    for (j in 1:iteration){
+      W_tmp <- vector(mode="list",length=self$L+1)
+      names(W_tmp) <- LETTERS[1:(self$L+1)]
+      d_tmp <- vector(mode="list",length=self$L+1)
+      names(d_tmp) <- LETTERS[1:(self$L+1)]
+      R1 <- sum((y-self$cal_clas(x))^2)
+      for (k in 1:(self$L +1)){
+        W_tmp[[LETTERS[k]]] <- self$W[[LETTERS[k]]]
+        for (l in 1:length(self$W[[LETTERS[k]]])){
+          self$W[[LETTERS[k]]][l] <- self$W[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
+        }
+        d_tmp[[LETTERS[k]]] <- self$d[[LETTERS[k]]]
+        for (l in 1:length(self$d[[LETTERS[k]]])){
+          self$d[[LETTERS[k]]][l] <- self$d[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
+        }
+      }
+      R2 <- sum((y-self$cal_clas(x))^2)
+      if (R1 < R2){
+        self$W <- W_tmp
+        self$d <- d_tmp
+        
+      }
+      
+      print(R1)
+      print(R2)
+      if (j %% 10){
+        print(j/10)
+      }
+    }
+    
   }
   )
 )
 
+lines <- read_lines("R_project/tic-tac-toe.data")
+lines2 <- read_lines("R_project/poker-hand-testing.data")
+lines2 %>% 
+  str_extract_all("[:digit:]+") ->
+  poker1
+poker2 <- as.numeric(unlist(poker1))
+
+poker <- matrix(poker2, nrow = 11)
+lines %>% 
+  str_replace_all("negative","0") %>% 
+  str_replace_all("positive","1") %>% 
+  str_replace_all("x","1") %>% 
+  str_replace_all("o","3") %>% 
+  str_replace_all("b","2") %>% 
+  str_extract_all("[:digit:]") ->
+  tic_tac1
 
 
-N1 <- NN$new(3,c(2,50,50,50,2)) 
-x_1 <- seq(-1,1,2/3)
-x_2 <- seq(0,10,10/3)
-x_3 <- x_1 * x_2
-x <- matrix(x_1,nrow=1)
-x <- rbind(x,x_2)
+tic_tac2 <- as.numeric(unlist(tic_tac1))
+tic_tac <- matrix(tic_tac2, nrow = 10)
 
-N1$calculate2(x)
+x_poker <- poker[-11,]
 
-plot(1,1,xlim=c(-1,1),ylim=c(-2,12))
-lines(x_1,x_1,type="l",col="red")
-lines(x_1,x_2,type="l",col="red")
-lines(x_1,x_3,type="l",col="black")
+x <- tic_tac[-10,1:950]
+x_all <- tic_tac[-10,]
 
-y <- N1$calculate2(x) 
-lines(x_1,y,col="blue")
 
-N1$GD3(x,x_3,1000,0.01)
-y <- N1$calculate2(x) 
-lines(x_1,y,col="orange")
+y <- tic_tac[10,1:950]
+y_poker <- poker[11,]
+
+
+y1 <- cbind(y,integer(length(y)))
+for (i in 1:length(y)){
+  if(y[i]==0) y1[i,2] <- 1
+}
+y_poker1 <- cbind(y_poker,integer(length(y_poker)))
+for (i in 1:length(y_poker)){
+  if(y_poker[i]==0) y_poker1[i,2] <- 1
+  if(y_poker[i]!=0) y_poker1[i,1] <- 1
+}
+
+
+y_poker1
+
+N1 <- NN$new(4,c(10,50,50,50,50,2)) 
+
+N1$GD_clas(x_poker,y_poker1,iteration = 1000,delta=0.02)
+
+
+
+N1$cal_clas(x_poker[,1:2])
+
+
+
 
 
 
