@@ -171,7 +171,7 @@ NN <- R6Class("NN", list(
   },
   
   # Durchführen von Backwardpropagation 
-  BP = function(x,y, gam = 1e-4, lambda = 0){
+  BP_reg = function(x,y, gam = 1e-4, lambda = 0){
     if(!is.array(x)) {
       x <- matrix(x, nrow = 1)
       }
@@ -359,22 +359,151 @@ NN <- R6Class("NN", list(
   )
 )
 
+
+# Durchführen von Backwardpropagation 
+BP_klas = function(x,y, gam = 1e-4, lambda = 0){
+  if(!is.array(x)) {
+    x <- matrix(x, nrow = 1)
+  }
+  
+  if(is.array(x)){
+    n <- dim(x)[2]
+    # Definition con C_v und C_w
+    C_w <- vector(mode="list",length=(self$L+1))
+    names(C_w) <- LETTERS[1:(self$L+1)]
+    
+    C_v <- vector(mode="list",length=self$L)
+    names(C_v) <- LETTERS[1:(self$L)]
+    
+    for(l in 1:self$L){
+      C_v[[LETTERS[l]]] <- matrix(0, ncol = self$B[l+1], nrow = dim(x)[2])
+    }
+    
+    for(l in 1:(self$L+1)){
+      # C_w[[LETTERS[l]]] <- array(0, dim = c(length(self$W[[LETTERS[l]]][1,]), 
+      #                                       length(self$W[[LETTERS[l]]][,1]), dim(x)[2] ))
+      C_w[[LETTERS[l]]] <- array(0, dim = c(dim(self$W[[LETTERS[l]]])[2], 
+                                            dim(self$W[[LETTERS[l]]])[1], dim(x)[2] ))
+    }
+    
+    for (i in 1: dim(x)[2]){
+      # Schritt 1 - Forwardpass und Definition von g_x, z und x_l
+      g_x <- self$calculate2(matrix(x[,i],ncol=1))
+      
+      z <- vector(mode="list",length=self$L)
+      names(z) <- LETTERS[1:(self$L)]
+      x_l <- vector(mode="list",length=self$L)
+      names(x_l) <- LETTERS[1:(self$L)]
+      
+      delta_l <- vector(mode="list",length=(self$L))
+      names(delta_l) <- LETTERS[1:(self$L)]
+      
+      for(l in 1:(self$L)){
+        z[[LETTERS[l]]] <- self$eval_till_layer_z(x[,i], l)
+        x_l[[LETTERS[l]]] <- self$eval_till_layer(x[,i], l)
+      }
+      
+      # Schritt 2a - Berechnung delta^(L) und der Ableitungen C_w[1,m]^(L+1)
+      delta_l[[LETTERS[self$L]]] <- (-2*(y[i]-g_x) %*% t(self$W[[LETTERS[self$L+1]]])) *self$del_f(z[[LETTERS[self$L]]])
+      
+      # Berechnung von C_w[L+1]
+      for(m in 1:length(self$W[[LETTERS[self$L+1]]][,1])){
+        C_w[[LETTERS[self$L+1]]][1,m,i] <- -2*(y[i] - g_x)*x_l[[LETTERS[self$L]]][m]
+        
+      }
+      
+      # Schritt 2b
+      for(l in (self$L-1):1){   
+        # Berechne delta^(l)         
+        delta_l[[LETTERS[l]]] <- (delta_l[[LETTERS[l+1]]] %*% t(self$W[[LETTERS[l+1]]])) *
+          self$del_f(z[[LETTERS[l]]])
+      }
+      
+      # Berechne C_v
+      for(l in (self$L):1){
+        C_v[[LETTERS[l]]][i,] <- delta_l[[LETTERS[l]]]
+      }
+      
+      # Berechne restliches C_w
+      for(l in (self$L):1){
+        for(j in 1:dim(self$W[[LETTERS[l]]])[2]){
+          for(m in 1:dim(self$W[[LETTERS[l]]])[1]){
+            if(l>1)
+              C_w[[LETTERS[l]]][j,m,i] <- delta_l[[LETTERS[l]]][j] * x_l[[LETTERS[l-1]]][m] else
+                C_w[[LETTERS[l]]][j,m,i] <- delta_l[[LETTERS[l]]][j] * x[,i][m]
+          }
+        }
+      }
+    }
+    
+    # Berechne neue Verschiebungsvektoren
+    for(l in 1:self$L){
+      sum <- 0
+      for(i in 1:n){
+        sum <- sum + C_v[[LETTERS[l]]][i,]
+      }
+      self$d[[LETTERS[l]]] <- self$d[[LETTERS[l]]] - gam * (1/n) * sum
+    }
+    
+    # Berechne neue Gewichtungsmatrizen
+    for(l in 1:(self$L+1)){
+      for(j in 1:dim(self$W[[LETTERS[l]]])[2]){
+        for(m in 1:dim(self$W[[LETTERS[l]]])[1]){
+          sum <- 0
+          for(i in 1:n){
+            sum <- sum + C_w[[LETTERS[l]]][j,m,i] +
+              2*lambda * self$W[[LETTERS[l]]][m,j]
+          }
+          self$W[[LETTERS[l]]][m,j] <- self$W[[LETTERS[l]]][m,j] -
+            gam*(1/n)*sum
+        }
+      }
+    }
+    return(self$W)
+  }
+},
+
+
+
+
+# Beispiele
+N1 <- NN$new(4,c(2,10,7,8,10,1))
+x <- matrix(c(1,1,2,2), ncol = 2)
+y <- c(1,1)
+
+
+# N1$calculate2(x)
+# N1$eval_till_layer_z(1:2,3)
+# N1$eval_till_layer(1:2,3)
+# N1$BP_reg(x,y)
+# N1$W
+
+N2 <- NN$new(3,c(1,30,30,30,1))
+x <- seq(-pi, pi, length.out=100)
+x
+y <- sin(x)
+y
+plot(x,y)
+for(i in 1:10000){print(i); plot(x,N2$calculate2(x)); N2$BP_reg(x,y, gam = 1e-3)}
+
+
+
 #lines <- read_lines("R_project/tic-tac-toe.data")
 #lines2 <- read_lines("R_project/poker-hand-testing.data")
 #lines2 %>% 
- # str_extract_all("[:digit:]+") ->
+# str_extract_all("[:digit:]+") ->
 #  poker1
 #poker2 <- as.numeric(unlist(poker1))
 
 #poker <- matrix(poker2, nrow = 11)
 #lines %>% 
-  #str_replace_all("negative","0") %>% 
-  #str_replace_all("positive","1") %>% 
-  #str_replace_all("x","1") %>% 
-  #str_replace_all("o","3") %>% 
-  #str_replace_all("b","2") %>% 
-  #str_extract_all("[:digit:]") ->
-  #tic_tac1
+#str_replace_all("negative","0") %>% 
+#str_replace_all("positive","1") %>% 
+#str_replace_all("x","1") %>% 
+#str_replace_all("o","3") %>% 
+#str_replace_all("b","2") %>% 
+#str_extract_all("[:digit:]") ->
+#tic_tac1
 
 
 #tic_tac2 <- as.numeric(unlist(tic_tac1))
@@ -392,12 +521,12 @@ NN <- R6Class("NN", list(
 
 #y1 <- cbind(y,integer(length(y)))
 #for (i in 1:length(y)){
- # if(y[i]==0) y1[i,2] <- 1
+# if(y[i]==0) y1[i,2] <- 1
 #}
 #y_poker1 <- cbind(y_poker,integer(length(y_poker)))
 #for (i in 1:length(y_poker)){
- # if(y_poker[i]==0) y_poker1[i,2] <- 1
-  #if(y_poker[i]!=0) y_poker1[i,1] <- 1
+# if(y_poker[i]==0) y_poker1[i,2] <- 1
+#if(y_poker[i]!=0) y_poker1[i,1] <- 1
 #}
 
 
@@ -410,28 +539,6 @@ NN <- R6Class("NN", list(
 
 
 #N1$cal_clas(x_poker[,1:2])
-
-N1 <- NN$new(4,c(2,10,7,8,10,1))
-x <- matrix(c(1,1,2,2), ncol = 2)
-y <- c(1,1)
-
-
-# N1$calculate2(x)
-# N1$eval_till_layer_z(1:2,3)
-# N1$eval_till_layer(1:2,3)
-# N1$BP(x,y)
-# N1$W
-
-N2 <- NN$new(3,c(1,30,30,30,1))
-x <- seq(-pi, pi, length.out=100)
-x
-y <- sin(x)
-y
-plot(x,y)
-for(i in 1:10000){print(i); plot(x,N2$calculate2(x)); N2$BP(x,y, gam = 1e-3)}
-
-
-
 
 
 
