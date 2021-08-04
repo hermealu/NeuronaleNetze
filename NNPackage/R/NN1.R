@@ -177,7 +177,7 @@ NN <- R6Class("NN", list(
       }
     
     if(is.array(x)){
-      n <- length(dim(x)[2])
+      n <- dim(x)[2]
     # Definition con C_v und C_w
       C_w <- vector(mode="list",length=(self$L+1))
       names(C_w) <- LETTERS[1:(self$L+1)]
@@ -416,11 +416,17 @@ x <- matrix(c(1,1,2,2), ncol = 2)
 y <- c(1,1)
 
 
-N1$calculate2(x)
-N1$eval_till_layer_z(1:2,3)
-N1$eval_till_layer(1:2,3)
-N1$BP(x,y)
-N1$W
+# N1$calculate2(x)
+# N1$eval_till_layer_z(1:2,3)
+# N1$eval_till_layer(1:2,3)
+# N1$BP(x,y)
+# N1$W
+
+N2 <- NN$new(4,c(1,10,7,8,10,1))
+x <- seq(0, pi, length.out=100)
+y <- sin(x)
+plot(x,y)
+N2$BP(x,y)
 
 
 
