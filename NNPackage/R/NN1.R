@@ -171,10 +171,14 @@ NN <- R6Class("NN", list(
   },
   
   # Durchführen von Backwardpropagation 
-  BP = function(x,y, gam = e-4, lambda = 0){
-    if(!is.array(x)) return(print(2))
+  BP = function(x,y, gam = 1e-4, lambda = 0){
+    if(!is.array(x)) {
+      x <- matrix(x, ncol = 1)
+      }
     
     if(is.array(x)){
+      n <- length(dim(x)[2])
+    # Definition con C_v und C_w
       C_w <- vector(mode="list",length=(self$L+1))
       names(C_w) <- LETTERS[1:(self$L+1)]
       
@@ -182,11 +186,18 @@ NN <- R6Class("NN", list(
       names(C_v) <- LETTERS[1:(self$L)]
       
       for(l in 1:self$L){
-        C_v[[LETTERS[l]]] <- matrix(0, ncol = dim(x)[2], nrow = self$B[l])
+        C_v[[LETTERS[l]]] <- matrix(0, ncol = self$B[l+1], nrow = dim(x)[2])
+      }
+      
+      for(l in 1:(self$L+1)){
+        # C_w[[LETTERS[l]]] <- array(0, dim = c(length(self$W[[LETTERS[l]]][1,]), 
+        #                                       length(self$W[[LETTERS[l]]][,1]), dim(x)[2] ))
+        C_w[[LETTERS[l]]] <- array(0, dim = c(dim(self$W[[LETTERS[l]]])[2], 
+                                              dim(self$W[[LETTERS[l]]])[1], dim(x)[2] ))
       }
       
       for (i in 1: dim(x)[2]){
-        # Schritt 1 - Forwardpass und Definition von Variablen
+        # Schritt 1 - Forwardpass und Definition von g_x, z und x_l
         g_x <- self$calculate2(matrix(x[,i],ncol=1))
         
         z <- vector(mode="list",length=self$L)
@@ -194,19 +205,8 @@ NN <- R6Class("NN", list(
         x_l <- vector(mode="list",length=self$L)
         names(x_l) <- LETTERS[1:(self$L)]
         
-        delta_l <- vector(mode="list",length=self$L)
+        delta_l <- vector(mode="list",length=(self$L))
         names(delta_l) <- LETTERS[1:(self$L)]
-        
-        
-        
-        C_w_i <- list()
-        
-        
-        for(l in 1:(self$L+1)){
-          C_w[[LETTERS[l]]] <- matrix(0, ncol = length(self$W[[LETTERS[l]]][,1]),
-                                      nrow = length(self$W[[LETTERS[l]]][1,] ))
-        }
-        
         
         for(l in 1:(self$L)){
          z[[LETTERS[l]]] <- self$eval_till_layer_z(x[,i], l)
@@ -214,91 +214,63 @@ NN <- R6Class("NN", list(
         }
         
         # Schritt 2a - Berechnung delta^(L) und der Ableitungen C_w[1,m]^(L+1)
-        delta_l[[LETTERS[self$L+1]]] <- matrix((-2*(y[i]-g_x) %*% t(self$W[[LETTERS[self$L+1]]])) *self$del_f(z[[LETTERS[self$L]]]), ncol = 1)
-        #delta_l[[LETTERS[self$L+1]]] <- (-2*(y[i]-g_x) %*% t(self$W[[LETTERS[self$L+1]]])) *self$del_f(z[[LETTERS[self$L]]])
+        delta_l[[LETTERS[self$L]]] <- (-2*(y[i]-g_x) %*% t(self$W[[LETTERS[self$L+1]]])) *self$del_f(z[[LETTERS[self$L]]])
         
+        # Berechnung von C_w[L+1]
         for(m in 1:length(self$W[[LETTERS[self$L+1]]][,1])){
-          C_w[[LETTERS[self$L+1]]][1,m] <- -2*(y[i] - g_x)*x_l[[LETTERS[self$L]]][m]
+          C_w[[LETTERS[self$L+1]]][1,m,i] <- -2*(y[i] - g_x)*x_l[[LETTERS[self$L]]][m]
+          
         }
         
         # Schritt 2b
-        for(l in (self$L):1){   
+        for(l in (self$L-1):1){   
           # Berechne delta^(l)         
-           # delta_l[[LETTERS[l]]] <- (t(self$W[[LETTERS[l+1]]]) %*% delta_l[[LETTERS[l+1]]]) *
-           #                             self$del_f(z[[LETTERS[l]]])
-           # 
-             
-             if(i == 1) {
-               a <- delta_l[[LETTERS[l+1]]]
-               b <- t(self$W[[LETTERS[l+1]]])
-              
-               print(l)
-               print(delta_l[[LETTERS[l+1]]])
-               print(t(self$W[[LETTERS[l+1]]]))
-               if(l == self$L) delta_l[[LETTERS[l]]] <-  b %*% a
-             }
-
-          # Berechne C_v
-          #C_v[[LETTERS[l]]] <- matrix(delta_l[[LETTERS[l]]]
-         
-          
-          # Berechne C_w's
-          # for(j in 1: length(self$W[[LETTERS[l]]][1,])){
-          #   for (m in 1: length(self$W[[LETTERS[l]]][,1])){
-          #     if(l>1)
-          #     C_w[[LETTERS[l]]][j,m] <- delta_l[[LETTERS[l]]][j] * x_l[[LETTERS[l-1]]][m] else
-          #       C_w[[LETTERS[l]]][j,m] <- delta_l[[LETTERS[l]]][j] * x[,i][m]   #stimmt m hier? 
-          #   }
-          # }
-          
-          #for (j in 1: length(self$W[[LETTERS[l]]][1,])){
-            #     for (m in 1: length(self$W[[LETTERS[l]]][,1])){
-            #       delC_mat[l][j, m] <- list(delta[l][j] * x_l[[l-1]][m])
-          
+           delta_l[[LETTERS[l]]] <- (delta_l[[LETTERS[l+1]]] %*% t(self$W[[LETTERS[l+1]]])) *
+                                       self$del_f(z[[LETTERS[l]]])
         }
-      
         
+        # Berechne C_v
+        for(l in (self$L):1){
+          C_v[[LETTERS[l]]][i,] <- delta_l[[LETTERS[l]]]
+        }
+         
+        # Berechne restliches C_w
+        for(l in (self$L):1){
+          for(j in 1:dim(self$W[[LETTERS[l]]])[2]){
+            for(m in 1:dim(self$W[[LETTERS[l]]])[1]){
+              if(l>1)
+              C_w[[LETTERS[l]]][j,m,i] <- delta_l[[LETTERS[l]]][j] * x_l[[LETTERS[l-1]]][m] else
+                C_w[[LETTERS[l]]][j,m,i] <- delta_l[[LETTERS[l]]][j] * x[,i][m]
+            }
+          }
+        }
       }
-      return(C_v)
+      
+      # Berechne neue Verschiebungsvektoren
+      for(l in 1:self$L){
+        sum <- 0
+        for(i in 1:n){
+          sum <- sum + C_v[[LETTERS[l]]][i,]
+        }
+        self$d[[LETTERS[l]]] <- self$d[[LETTERS[l]]] - gam * (1/n) * sum
+      }
+      
+      # Berechne neue Gewichtungsmatrizen
+      for(l in 1:(self$L+1)){
+        for(j in 1:dim(self$W[[LETTERS[l]]])[2]){
+          for(m in 1:dim(self$W[[LETTERS[l]]])[1]){
+            sum <- 0
+            for(i in 1:n){
+              sum <- sum + C_w[[LETTERS[l]]][j,m,i] +
+                      2*lambda * self$W[[LETTERS[l]]][m,j]
+            }
+      self$W[[LETTERS[l]]][m,j] <- self$W[[LETTERS[l]]][m,j] -
+                                  gam*(1/n)*sum
+        }
+      }
+      }
+      return(self$W)
     }
-    # Schritt 1 - Berechne z(l), x(l) und g(x) mit Forwardpass
-    # g_x <- self$calculate2(x)
-    # n <- length(y)
-  
-    # 
-    # # Schritt 2a - Berechne delta[L] und Ableitung von C nach W[L+1]
-    #
-    # # Schritt 2b 
-    # for( l in (self$L -1):1){
-    #   # Berechne delta[l]
-    #   delta[l] <- list((t(self$W[[LETTERS[l+1]]]) %*% delta[[l+1]])*del_f(z[[l]]))
-    #   
-    #   # Brechne Ableitungen von C nach Verschiebungsvektoren und Gew.matrixen
-    #   delC_vek[l] <- delta[l]
-    #  
-    #   for (j in 1: length(self$W[[LETTERS[l]]][1,])){
-    #     for (m in 1: length(self$W[[LETTERS[l]]][,1])){
-    #       delC_mat[l][j, m] <- list(delta[l][j] * x_l[[l-1]][m])
-    #       
-    #       # Berechne neue Verschiebungsvektoren
-    #       sum <- 0
-    #       for (i in 1:n ){
-    #         sum <- sum + delC_vek[[l]][i]
-    #       }
-    #       
-    #       self$d[[LETTERS[l]]] <- self$d[[LETTERS[l]]] - gam * (1/n * sum)
-    #       
-    #       # Berechne neue Gewichtsmatrizen
-    #       sum <- 0
-    #       for (i in 1:n ){
-    #         sum <- sum + delC_mat[l][[j,m]][i] + 2*lambda * self$W[[LETTERS[l]]][j,m]
-    #       }
-    #       
-    #       self$W[[LETTERS[l]]][j,m] <- self$W[[LETTERS[l]]][j,m] - gam * (1/n * sum)
-    #   
-    #     }
-    #   }
-    # }
   },
 
     
