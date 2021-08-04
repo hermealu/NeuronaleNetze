@@ -17,7 +17,7 @@ sigmoid <- function(x){
 }
 
 del_sigmoid <- function(x){
-  return(sigmoid(x)(1-sigmoid(x)))
+  return(sigmoid(x)*(1-sigmoid(x)))
 }
 
 del_tanh <- function(x){
@@ -36,12 +36,14 @@ NN <- R6Class("NN", list(
   J = 0,
   theta = c(1,1),
   f = sigmoid,
+  del_f = del_sigmoid,
   
   initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1),d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
     stopifnot(length(B) == L+2)
     self$W <- vector(mode="list",length=L+1)
     self$L <- L
     self$B <- B
+    
     
     #Erstellen der Matrizen W
     for (i in (0:L)){
@@ -69,23 +71,24 @@ NN <- R6Class("NN", list(
     
   },
   #calculate führt die funktion des NN aus 
-  calculate = function(x=1){
-    for (j in (1:length(x))){
-      h <- x[j]
-      if (self$L >= 1){
-        for (i in LETTERS[1:(self$L)]){
-          h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
-        }
-      }  
-      h <- self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]]
-      x[j] <- h
-    }  
-    return(x)
-  },
+  # calculate = function(x=1){
+  #   for (j in (1:length(x))){
+  #     h <- x[j]
+  #     if (self$L >= 1){
+  #       for (i in LETTERS[1:(self$L)]){
+  #         h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
+  #       }
+  #     }  
+  #     h <- self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]]
+  #     x[j] <- h
+  #   }  
+  #   return(x)
+  # },
+  
   calculate2 = function(x=1){
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
-      for (j in (1:(dim(x)[2]))){
+      for (j in (1:(dim(x)[2]))){    
         h <- x[,j]
         if (self$L >= 1){
           for (i in LETTERS[1:(self$L)]){
@@ -111,6 +114,8 @@ NN <- R6Class("NN", list(
     }  
     return(x)
   },
+  
+  
   cal_clas = function(x=1){
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
@@ -144,15 +149,159 @@ NN <- R6Class("NN", list(
   
   eval_till_layer = function(x=1,Layer=1){
     if (Layer == self$L +1){
-      x <- self$calculate(x)
+      x <- self$calculate2(x)
     }
     if (self$L >= 1){
-      for (i in LETTERS[1:(Layer)]){
-        x <- self$f(self$d[[i]] + x %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
+      h <- x
+      for (i in LETTERS[1:(Layer)]){  # Kann das von 1 laufen? Was ist mit dem Input?
+          h <- self$f(self$d[[i]] + h %*% self$W[[i]] ) #letzter Schritt ist ohne Aktivierungsfunktion
+        }
+        
       }
-    }
-    return(x)
+    
+    return(h)
   },
+  
+  eval_till_layer_z = function(x=1,Layer=1){
+    if(Layer > 1) evx <- self$eval_till_layer(x, Layer-1)
+    if(Layer == 1) evx <- x
+    h <- self$d[[LETTERS[Layer]]] + evx %*% self$W[[LETTERS[Layer]]] 
+    
+    return(h)
+  },
+  
+  # Durchführen von Backwardpropagation 
+  BP = function(x,y, gam = e-4, lambda = 0){
+    if(!is.array(x)) return(print(2))
+    
+    if(is.array(x)){
+      C_w <- vector(mode="list",length=(self$L+1))
+      names(C_w) <- LETTERS[1:(self$L+1)]
+      
+      C_v <- vector(mode="list",length=self$L)
+      names(C_v) <- LETTERS[1:(self$L)]
+      
+      for(l in 1:self$L){
+        C_v[[LETTERS[l]]] <- matrix(0, ncol = dim(x)[2], nrow = self$B[l])
+      }
+      
+      for (i in 1: dim(x)[2]){
+        # Schritt 1 - Forwardpass und Definition von Variablen
+        g_x <- self$calculate2(matrix(x[,i],ncol=1))
+        
+        z <- vector(mode="list",length=self$L)
+        names(z) <- LETTERS[1:(self$L)]
+        x_l <- vector(mode="list",length=self$L)
+        names(x_l) <- LETTERS[1:(self$L)]
+        
+        delta_l <- vector(mode="list",length=self$L)
+        names(delta_l) <- LETTERS[1:(self$L)]
+        
+        
+        
+        C_w_i <- list()
+        
+        
+        for(l in 1:(self$L+1)){
+          C_w[[LETTERS[l]]] <- matrix(0, ncol = length(self$W[[LETTERS[l]]][,1]),
+                                      nrow = length(self$W[[LETTERS[l]]][1,] ))
+        }
+        
+        
+        for(l in 1:(self$L)){
+         z[[LETTERS[l]]] <- self$eval_till_layer_z(x[,i], l)
+         x_l[[LETTERS[l]]] <- self$eval_till_layer(x[,i], l)
+        }
+        
+        # Schritt 2a - Berechnung delta^(L) und der Ableitungen C_w[1,m]^(L+1)
+        delta_l[[LETTERS[self$L+1]]] <- matrix((-2*(y[i]-g_x) %*% t(self$W[[LETTERS[self$L+1]]])) *self$del_f(z[[LETTERS[self$L]]]), ncol = 1)
+        #delta_l[[LETTERS[self$L+1]]] <- (-2*(y[i]-g_x) %*% t(self$W[[LETTERS[self$L+1]]])) *self$del_f(z[[LETTERS[self$L]]])
+        
+        for(m in 1:length(self$W[[LETTERS[self$L+1]]][,1])){
+          C_w[[LETTERS[self$L+1]]][1,m] <- -2*(y[i] - g_x)*x_l[[LETTERS[self$L]]][m]
+        }
+        
+        # Schritt 2b
+        for(l in (self$L):1){   
+          # Berechne delta^(l)         
+           # delta_l[[LETTERS[l]]] <- (t(self$W[[LETTERS[l+1]]]) %*% delta_l[[LETTERS[l+1]]]) *
+           #                             self$del_f(z[[LETTERS[l]]])
+           # 
+             
+             if(i == 1) {
+               a <- delta_l[[LETTERS[l+1]]]
+               b <- t(self$W[[LETTERS[l+1]]])
+              
+               print(l)
+               print(delta_l[[LETTERS[l+1]]])
+               print(t(self$W[[LETTERS[l+1]]]))
+               if(l == self$L) delta_l[[LETTERS[l]]] <-  b %*% a
+             }
+
+          # Berechne C_v
+          #C_v[[LETTERS[l]]] <- matrix(delta_l[[LETTERS[l]]]
+         
+          
+          # Berechne C_w's
+          # for(j in 1: length(self$W[[LETTERS[l]]][1,])){
+          #   for (m in 1: length(self$W[[LETTERS[l]]][,1])){
+          #     if(l>1)
+          #     C_w[[LETTERS[l]]][j,m] <- delta_l[[LETTERS[l]]][j] * x_l[[LETTERS[l-1]]][m] else
+          #       C_w[[LETTERS[l]]][j,m] <- delta_l[[LETTERS[l]]][j] * x[,i][m]   #stimmt m hier? 
+          #   }
+          # }
+          
+          #for (j in 1: length(self$W[[LETTERS[l]]][1,])){
+            #     for (m in 1: length(self$W[[LETTERS[l]]][,1])){
+            #       delC_mat[l][j, m] <- list(delta[l][j] * x_l[[l-1]][m])
+          
+        }
+      
+        
+      }
+      return(C_v)
+    }
+    # Schritt 1 - Berechne z(l), x(l) und g(x) mit Forwardpass
+    # g_x <- self$calculate2(x)
+    # n <- length(y)
+  
+    # 
+    # # Schritt 2a - Berechne delta[L] und Ableitung von C nach W[L+1]
+    #
+    # # Schritt 2b 
+    # for( l in (self$L -1):1){
+    #   # Berechne delta[l]
+    #   delta[l] <- list((t(self$W[[LETTERS[l+1]]]) %*% delta[[l+1]])*del_f(z[[l]]))
+    #   
+    #   # Brechne Ableitungen von C nach Verschiebungsvektoren und Gew.matrixen
+    #   delC_vek[l] <- delta[l]
+    #  
+    #   for (j in 1: length(self$W[[LETTERS[l]]][1,])){
+    #     for (m in 1: length(self$W[[LETTERS[l]]][,1])){
+    #       delC_mat[l][j, m] <- list(delta[l][j] * x_l[[l-1]][m])
+    #       
+    #       # Berechne neue Verschiebungsvektoren
+    #       sum <- 0
+    #       for (i in 1:n ){
+    #         sum <- sum + delC_vek[[l]][i]
+    #       }
+    #       
+    #       self$d[[LETTERS[l]]] <- self$d[[LETTERS[l]]] - gam * (1/n * sum)
+    #       
+    #       # Berechne neue Gewichtsmatrizen
+    #       sum <- 0
+    #       for (i in 1:n ){
+    #         sum <- sum + delC_mat[l][[j,m]][i] + 2*lambda * self$W[[LETTERS[l]]][j,m]
+    #       }
+    #       
+    #       self$W[[LETTERS[l]]][j,m] <- self$W[[LETTERS[l]]][j,m] - gam * (1/n * sum)
+    #   
+    #     }
+    #   }
+    # }
+  },
+
+    
   
   #Durchführen eines Gradientdescends
   GD = function(x,y,lambda=1,stepsize=1e-4,iterations=100){
@@ -238,57 +387,68 @@ NN <- R6Class("NN", list(
   )
 )
 
-lines <- read_lines("R_project/tic-tac-toe.data")
-lines2 <- read_lines("R_project/poker-hand-testing.data")
-lines2 %>% 
-  str_extract_all("[:digit:]+") ->
-  poker1
-poker2 <- as.numeric(unlist(poker1))
+#lines <- read_lines("R_project/tic-tac-toe.data")
+#lines2 <- read_lines("R_project/poker-hand-testing.data")
+#lines2 %>% 
+ # str_extract_all("[:digit:]+") ->
+#  poker1
+#poker2 <- as.numeric(unlist(poker1))
 
-poker <- matrix(poker2, nrow = 11)
-lines %>% 
-  str_replace_all("negative","0") %>% 
-  str_replace_all("positive","1") %>% 
-  str_replace_all("x","1") %>% 
-  str_replace_all("o","3") %>% 
-  str_replace_all("b","2") %>% 
-  str_extract_all("[:digit:]") ->
-  tic_tac1
-
-
-tic_tac2 <- as.numeric(unlist(tic_tac1))
-tic_tac <- matrix(tic_tac2, nrow = 10)
-
-x_poker <- poker[-11,]
-
-x <- tic_tac[-10,1:950]
-x_all <- tic_tac[-10,]
+#poker <- matrix(poker2, nrow = 11)
+#lines %>% 
+  #str_replace_all("negative","0") %>% 
+  #str_replace_all("positive","1") %>% 
+  #str_replace_all("x","1") %>% 
+  #str_replace_all("o","3") %>% 
+  #str_replace_all("b","2") %>% 
+  #str_extract_all("[:digit:]") ->
+  #tic_tac1
 
 
-y <- tic_tac[10,1:950]
-y_poker <- poker[11,]
+#tic_tac2 <- as.numeric(unlist(tic_tac1))
+#tic_tac <- matrix(tic_tac2, nrow = 10)
+
+#x_poker <- poker[-11,]
+
+#x <- tic_tac[-10,1:950] 
+#x_all <- tic_tac[-10,]
 
 
-y1 <- cbind(y,integer(length(y)))
-for (i in 1:length(y)){
-  if(y[i]==0) y1[i,2] <- 1
-}
-y_poker1 <- cbind(y_poker,integer(length(y_poker)))
-for (i in 1:length(y_poker)){
-  if(y_poker[i]==0) y_poker1[i,2] <- 1
-  if(y_poker[i]!=0) y_poker1[i,1] <- 1
-}
+#y <- tic_tac[10,1:950]
+#y_poker <- poker[11,]
 
 
-y_poker1
+#y1 <- cbind(y,integer(length(y)))
+#for (i in 1:length(y)){
+ # if(y[i]==0) y1[i,2] <- 1
+#}
+#y_poker1 <- cbind(y_poker,integer(length(y_poker)))
+#for (i in 1:length(y_poker)){
+ # if(y_poker[i]==0) y_poker1[i,2] <- 1
+  #if(y_poker[i]!=0) y_poker1[i,1] <- 1
+#}
 
-N1 <- NN$new(4,c(10,50,50,50,50,2)) 
 
-N1$GD_clas(x_poker,y_poker1,iteration = 1000,delta=0.02)
+#y_poker1 
+
+#N1 <- NN$new(4,c(10,50,50,50,50,2)) 
+
+#N1$GD_clas(x_poker,y_poker1,iteration = 1000,delta=0.02)
 
 
 
-N1$cal_clas(x_poker[,1:2])
+#N1$cal_clas(x_poker[,1:2])
+
+N1 <- NN$new(4,c(2,10,7,8,10,1))
+x <- matrix(c(1,1,2,2), ncol = 2)
+y <- c(1,1)
+
+
+N1$calculate2(x)
+N1$eval_till_layer_z(1:2,3)
+N1$eval_till_layer(1:2,3)
+N1$BP(x,y)
+N1$W
 
 
 
