@@ -173,7 +173,7 @@ NN <- R6Class("NN", list(
   # Durchführen von Backwardpropagation 
   BP = function(x,y, gam = 1e-4, lambda = 0){
     if(!is.array(x)) {
-      x <- matrix(x, ncol = 1)
+      x <- matrix(x, nrow = 1)
       }
     
     if(is.array(x)){
@@ -422,11 +422,13 @@ y <- c(1,1)
 # N1$BP(x,y)
 # N1$W
 
-N2 <- NN$new(4,c(1,10,7,8,10,1))
-x <- seq(0, pi, length.out=100)
+N2 <- NN$new(3,c(1,30,30,30,1))
+x <- seq(-pi, pi, length.out=100)
+x
 y <- sin(x)
+y
 plot(x,y)
-N2$BP(x,y)
+for(i in 1:10000){print(i); plot(x,N2$calculate2(x)); N2$BP(x,y, gam = 1e-3)}
 
 
 
