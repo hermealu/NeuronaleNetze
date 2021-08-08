@@ -2,7 +2,7 @@
 % Please edit documentation in R/NN1.R
 \name{sigmoid}
 \alias{sigmoid}
-\title{Calculating the sigmoid of a vector}
+\title{Sigmoid function}
 \usage{
 sigmoid(x)
 }

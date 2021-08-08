@@ -1,11 +1,37 @@
+#' Softmax function
+#'
+#' Calculating the softmax function of a vector
+#'
+#' The softmax function maps the entries a vector onto the intervall (0,1]
+#'
+#' @param x A vector.
+#' @return A vector of solutions of \code{1/sum(exp(x))*exp(x)}
+#' @examples
+#' softmax(1)
+#' softmax(1:100)
+#' @export
 softmax <- function(x){
   return(1/sum(exp(x))*exp(x))
 }
 
+
+#' Tangens hyperbolicus
+#'
+#' Calculating the tangens hyperbolicus of a vector
+#'
+#' @param x A vector.
+#' @return A vector of solutions of \code{(exp(2*x)-1)/(exp(2*x)+1)}
+#' @examples
+#' tanh(1)
+#' tanh(1:100)
+#' @export
 tanh <- function(x){
   return((exp(2*x)-1)/(exp(2*x)+1))
 }
 
+
+#' Sigmoid function
+#'
 #' Calculating the sigmoid of a vector
 #'
 #' @param x A vector.
@@ -18,18 +44,68 @@ sigmoid <- function(x){
   return(1/(1+exp(-x)))
 }
 
+
+#' Derivative of sigmoid function
+#'
+#' Calculating the sigmoid's first derivative of a vector
+#'
+#' @param x A vector.
+#' @return A vector of solutions of \code{sigmoid(x)*(1-sigmoid(x))}
+#' @examples
+#' del_sigmoid(1)
+#' del_sigmoid(1:100)
+#' @export
 del_sigmoid <- function(x){
   return(sigmoid(x)*(1-sigmoid(x)))
 }
 
+
+#' Derivative of tangens hyperbolicus
+#'
+#' Calculating the tangens hyperbolicus' first derivative of a vector
+#'
+#' @param x A vector.
+#' @return A vector of solutions of \code{4/((exp(-x)+exp(x))^2)}
+#' @examples
+#' del_tanh(1)
+#' del_tanh(1:100)
+#' @export
 del_tanh <- function(x){
   return(4/((exp(-x)+exp(x))^2))
 }
 
+
+#' Identity
+#'
+#' Calculating the identity of a vector
+#'
+#' @param x A vector.
+#' @return A vector of solutions of \code{x}
+#' @examples
+#' id(1)
+#' id(1:100)
+#' @export
 id <- function(x){
   return(x)
 }
 
+
+#' The title for my S4 class that extends \code{"character"} class.
+#'
+#' Some details about this class and my plans for it in the body.
+#'
+#' \describe{
+#' \item{L}{number of hidden layers}
+#'
+#' \item{B}{width of each layer}
+#'
+#' \item{W}{weight matrices}
+#' #'
+#' \item{d}{width vector}
+#' }
+#' @name NN
+#' @rdname NN
+#' @exportClass NN
 NN <- R6Class("NN", list(
   L = 1, #Anzahl der Hidden Layer
   B = c(1), #Breite der einzelnen Layer
@@ -40,6 +116,18 @@ NN <- R6Class("NN", list(
   f = sigmoid,
   del_f = del_sigmoid,
 
+  #' @description
+  #'
+  #' Initializing a NN
+  #'
+  #' @param L a vector
+  #' @param B a vector
+  #' @param W a vector
+  #' @param d a vector
+  #' @param min_gewicht a vector
+  #' @param max_gewicht a vector
+  #' @return A vector of solutions of \code{x}
+  #' @export
   initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1),d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
     stopifnot(length(B) == L+2)
     self$W <- vector(mode="list",length=L+1)
@@ -87,6 +175,11 @@ NN <- R6Class("NN", list(
   #   return(x)
   # },
 
+  #' @description
+  #' Calculating the function of NN
+  #'
+  #' @param x A vector.
+  #' @export
   calculate2 = function(x=1){
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
@@ -117,7 +210,11 @@ NN <- R6Class("NN", list(
     return(x)
   },
 
-
+  #' @description
+  #' Calculating feed forward with softmax
+  #'
+  #' @param x A vector.
+  #' @export
   cal_clas = function(x=1){
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
@@ -149,6 +246,12 @@ NN <- R6Class("NN", list(
     return(y)
   },
 
+  #' @description
+  #' Calculating NN up to a certain layer
+  #'
+  #' @param x A vector
+  #' @param L A vector
+  #' @export
   eval_till_layer = function(x=1,Layer=1){
     if (Layer == self$L +1){
       x <- self$calculate2(x)
@@ -156,7 +259,7 @@ NN <- R6Class("NN", list(
     if (self$L >= 1){
       h <- x
       for (i in LETTERS[1:(Layer)]){  # Kann das von 1 laufen? Was ist mit dem Input?
-        h <- self$f(self$d[[i]] + h %*% self$W[[i]] ) #letzter Schritt ist ohne Aktivierungsfunktion
+        h <- self$f(self$d[[i]] + h %*% self$W[[i]] )
       }
 
     }
@@ -164,6 +267,12 @@ NN <- R6Class("NN", list(
     return(h)
   },
 
+  #' @description
+  #' Calculating NN up to a certain layer without activation function in last step
+  #'
+  #' @param x A vector
+  #' @param L A vector
+  #' @export
   eval_till_layer_z = function(x=1,Layer=1){
     if(Layer > 1) evx <- self$eval_till_layer(x, Layer-1)
     if(Layer == 1) evx <- x
@@ -172,6 +281,14 @@ NN <- R6Class("NN", list(
     return(h)
   },
 
+  #' @description
+  #' Calculating gradient descent for regression
+  #'
+  #' @param x A vector
+  #' @param y A vector
+  #' @param gam A vector
+  #' @param lambda A vector
+  #' @export
   # Durchführen von Backwardpropagation - Regression
   BP_reg = function(x,y, gam = 1e-4, lambda = 0){
     if(!is.array(x)) {
@@ -294,6 +411,13 @@ NN <- R6Class("NN", list(
       self$W[[LETTERS[self$L]]] <- self$W[[LETTERS[self$L]]] + 0.1*t(self$W[[LETTERS[self$L+1]]])*self$eval_till_layer(x[i],self$L)*(y[i]-self$calculate(x[i]))
     }
   },
+
+  #' @description
+  #' Calculating gradient descent
+  #'
+  #' @param x A vector
+  #' @param y A vector
+  #' @export
   GD3 = function(x,y,iteration=10,delta=0.02){
     for (j in 1:iteration){
       W_tmp <- vector(mode="list",length=self$L+1)
@@ -327,6 +451,15 @@ NN <- R6Class("NN", list(
 
   },
 
+  #' @description
+  #' Calculating stochastic gradient descent
+  #'
+  #' @param x A vector
+  #' @param y A vector
+  #' @param n a vector
+  #' @param delta a vector
+  #' @param iteration a vector
+  #' @export
   SGD = function(x,y,n,delta=1e-2,iteration=10){
     if(!is.array(x)) {x <- matrix(x,nrow=1); y <- matrix(y,nrow=1)}
     for (j in 1:iteration){
@@ -346,7 +479,14 @@ NN <- R6Class("NN", list(
   },
 
 
-
+  #' @description
+  #' Calculating random descent
+  #'
+  #' @param x A vector
+  #' @param y A vector
+  #' @param iteration A vector
+  #' @param delta A vector
+  #' @export
   GD_clas = function(x,y,iteration=1000,delta=0.002){
     for (j in 1:iteration){
       W_tmp <- vector(mode="list",length=self$L+1)
@@ -380,6 +520,14 @@ NN <- R6Class("NN", list(
 
   },
   # Durchführen von Backwardpropagation - Klassifikation
+  #' @description
+  #' Calculating gradient descent for classification
+  #'
+  #' @param x A vector
+  #' @param y A vector
+  #' @param gam A vector
+  #' @param lambda A vector
+  #' @export
   BP_klas = function(x,y, gam = 1e-4, lambda = 0){
     if(!is.array(x)) {
       x <- matrix(x, nrow = 1)
