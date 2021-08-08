@@ -40,7 +40,7 @@ show_shiny <- function(){
       if (input$art == 3) N1$GD3(x1,y1,delta=0.01,iteration = input$iterations)
       if (input$art == 1) for (i in 1:input$iterations) {N1$BP_reg(x1,y1,gam=0.01);print(i)}
       if (input$art == 2) N1$SGD(n = input$batches,x1,y1,delta=0.01,iteration = input$iterations)
-      y3 <- N1$calculate2(x1)
+      y3 <- N1$ffprop(x1)
       data1 %>%
         mutate(NN=y3) ->
         data1

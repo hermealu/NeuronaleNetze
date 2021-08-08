@@ -2,24 +2,23 @@
 % Please edit documentation in R/NN1.R
 \name{NN}
 \alias{NN}
-\title{The title for my S4 class that extends \code{"character"} class.}
+\title{S6 class that can generate Neural Networks}
 \description{
-The title for my S4 class that extends \code{"character"} class.
+S6 class that can generate Neural Networks
 
-The title for my S4 class that extends \code{"character"} class.
+S6 class that can generate Neural Networks
 }
 \details{
-Some details about this class and my plans for it in the body.
+In this class Neural Networks can be generated and optimized via different
+Gradient Descends Methods
 
-\describe{
-\item{L}{number of hidden layers}
+\describe{ \item{L}{number of hidden layers}
 
 \item{B}{width of each layer}
 
 \item{W}{weight matrices}
-#'
-\item{d}{width vector}
-}
+
+\item{d}{width vector} }
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -27,16 +26,13 @@ Some details about this class and my plans for it in the body.
 \item \href{#method-f}{\code{NN$f()}}
 \item \href{#method-del_f}{\code{NN$del_f()}}
 \item \href{#method-new}{\code{NN$new()}}
-\item \href{#method-calculate2}{\code{NN$calculate2()}}
-\item \href{#method-cal_clas}{\code{NN$cal_clas()}}
+\item \href{#method-ffprop}{\code{NN$ffprop()}}
+\item \href{#method-ffprop_clas}{\code{NN$ffprop_clas()}}
 \item \href{#method-eval_till_layer}{\code{NN$eval_till_layer()}}
 \item \href{#method-eval_till_layer_z}{\code{NN$eval_till_layer_z()}}
 \item \href{#method-BP_reg}{\code{NN$BP_reg()}}
-\item \href{#method-GD}{\code{NN$GD()}}
-\item \href{#method-GD2}{\code{NN$GD2()}}
-\item \href{#method-GD3}{\code{NN$GD3()}}
 \item \href{#method-SGD}{\code{NN$SGD()}}
-\item \href{#method-GD_clas}{\code{NN$GD_clas()}}
+\item \href{#method-SGD_clas}{\code{NN$SGD_clas()}}
 \item \href{#method-BP_klas}{\code{NN$BP_klas()}}
 \item \href{#method-clone}{\code{NN$clone()}}
 }
@@ -97,12 +93,12 @@ A vector of solutions of \code{x}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-calculate2"></a>}}
-\if{latex}{\out{\hypertarget{method-calculate2}{}}}
-\subsection{Method \code{calculate2()}}{
+\if{html}{\out{<a id="method-ffprop"></a>}}
+\if{latex}{\out{\hypertarget{method-ffprop}{}}}
+\subsection{Method \code{ffprop()}}{
 Calculating the function of NN
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$calculate2(x = 1)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$ffprop(x = 1)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -114,12 +110,12 @@ Calculating the function of NN
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_clas"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_clas}{}}}
-\subsection{Method \code{cal_clas()}}{
+\if{html}{\out{<a id="method-ffprop_clas"></a>}}
+\if{latex}{\out{\hypertarget{method-ffprop_clas}{}}}
+\subsection{Method \code{ffprop_clas()}}{
 Calculating feed forward with softmax
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$cal_clas(x = 1)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$ffprop_clas(x = 1)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -192,43 +188,6 @@ Calculating gradient descent for regression
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GD"></a>}}
-\if{latex}{\out{\hypertarget{method-GD}{}}}
-\subsection{Method \code{GD()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$GD(x, y, lambda = 1, stepsize = 1e-04, iterations = 100)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GD2"></a>}}
-\if{latex}{\out{\hypertarget{method-GD2}{}}}
-\subsection{Method \code{GD2()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$GD2(x, y, lambda = 1, stepsize = 1e-04, iterations = 100)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GD3"></a>}}
-\if{latex}{\out{\hypertarget{method-GD3}{}}}
-\subsection{Method \code{GD3()}}{
-Calculating gradient descent
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$GD3(x, y, iteration = 10, delta = 0.02)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{A vector}
-
-\item{\code{y}}{A vector}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-SGD"></a>}}
 \if{latex}{\out{\hypertarget{method-SGD}{}}}
 \subsection{Method \code{SGD()}}{
@@ -254,27 +213,13 @@ Calculating stochastic gradient descent
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GD_clas"></a>}}
-\if{latex}{\out{\hypertarget{method-GD_clas}{}}}
-\subsection{Method \code{GD_clas()}}{
-Calculating random descent
+\if{html}{\out{<a id="method-SGD_clas"></a>}}
+\if{latex}{\out{\hypertarget{method-SGD_clas}{}}}
+\subsection{Method \code{SGD_clas()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$GD_clas(x, y, iteration = 1000, delta = 0.002)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$SGD_clas(x, y, n, delta = 0.01, iteration = 10)}\if{html}{\out{</div>}}
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{A vector}
-
-\item{\code{y}}{A vector}
-
-\item{\code{iteration}}{A vector}
-
-\item{\code{delta}}{A vector}
-}
-\if{html}{\out{</div>}}
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BP_klas"></a>}}

@@ -128,7 +128,7 @@ NN <- R6Class("NN", list(
   #' @return A vector of solutions of \code{x}
   #' @export
   initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1), d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
-    L <- lenght(B)-2
+    L <- length(B)-2
     stopifnot(L >= 1)
     self$W <- vector(mode="list",length=L+1)
     self$L <- L
@@ -152,13 +152,6 @@ NN <- R6Class("NN", list(
     for (i in (0:L)){
       self$J <- self$J + norm(self$W[[i+1]],"F")
     }
-
-    #Erstellen der theta
-    for(i in 1:L){
-      self$theta[i] <- list(c(unlist(self$W[i]), unlist(self$d[i])))
-    }
-    self$theta[L+1] <- self$W[L+1]
-
   },
 
   #' @description
@@ -166,7 +159,8 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector.
   #' @export
-  calculate2 = function(x=1){
+  # Feedforward propagation - regression
+  ffprop = function(x=1){
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
       for (j in (1:(dim(x)[2]))){
@@ -201,7 +195,8 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector.
   #' @export
-  cal_clas = function(x=1){
+  # Feedwordward propagation - classification
+  ffprop_clas = function(x=1){
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
       for (j in (1:(dim(x)[2]))){
@@ -228,7 +223,7 @@ NN <- R6Class("NN", list(
   #' @export
   eval_till_layer = function(x=1,Layer=1){
     if (Layer == self$L +1){
-      x <- self$calculate2(x)
+      x <- self$ffprop(x)
     }
     if (self$L >= 1){
       h <- x
@@ -263,7 +258,7 @@ NN <- R6Class("NN", list(
   #' @param gam A vector
   #' @param lambda A vector
   #' @export
-  # Durchführen von Backwardpropagation - Regression
+  # Realization of backwardpropagation - regression
   BP_reg = function(x,y, gam = 1e-4, lambda = 0){
     if(!is.array(x)) {
       x <- matrix(x, nrow = 1)
@@ -271,7 +266,8 @@ NN <- R6Class("NN", list(
 
     if(is.array(x)){
       n <- dim(x)[2]
-      # Definition con C_v und C_w
+
+      # Definition von C_v und C_w
       C_w <- vector(mode="list",length=(self$L+1))
       names(C_w) <- LETTERS[1:(self$L+1)]
 
@@ -283,15 +279,14 @@ NN <- R6Class("NN", list(
       }
 
       for(l in 1:(self$L+1)){
-        # C_w[[LETTERS[l]]] <- array(0, dim = c(length(self$W[[LETTERS[l]]][1,]),
-        #                                       length(self$W[[LETTERS[l]]][,1]), dim(x)[2] ))
         C_w[[LETTERS[l]]] <- array(0, dim = c(dim(self$W[[LETTERS[l]]])[2],
                                               dim(self$W[[LETTERS[l]]])[1], dim(x)[2] ))
       }
 
       for (i in 1: dim(x)[2]){
+
         # Schritt 1 - Forwardpass und Definition von g_x, z und x_l
-        g_x <- self$calculate2(matrix(x[,i],ncol=1))
+        g_x <- self$ffprop(matrix(x[,i],ncol=1))
 
         z <- vector(mode="list",length=self$L)
         names(z) <- LETTERS[1:(self$L)]
@@ -316,9 +311,9 @@ NN <- R6Class("NN", list(
         }
 
         # Schritt 2b
+        # Berechne delta^(l)
         if(self$L > 1){
           for(l in (self$L-1):1){
-            # Berechne delta^(l)
             delta_l[[LETTERS[l]]] <- (delta_l[[LETTERS[l+1]]] %*% t(self$W[[LETTERS[l+1]]])) *
               self$del_f(z[[LETTERS[l]]])
           }
@@ -369,65 +364,6 @@ NN <- R6Class("NN", list(
     }
   },
 
-
-
-  #Durchführen eines Gradientdescends
-  GD = function(x,y,lambda=1,stepsize=1e-4,iterations=100){
-    n <- length(x)
-    R1 <- 1/n * sum((y-self$calculate(x))^2)
-    for (i in 1:iterations){
-      self$W[["A"]] <- self$W[["A"]] + 1e-3 * x[i] * (y[i]-self$calculate(x[i]))
-    }
-    R2 <- 1/n * sum((y-self$calculate(x))^2)
-  },
-
-  GD2 = function(x,y,lambda=1,stepsize=1e-4,iterations=100){
-    n <- length(x)
-    for (i in 1:n){
-      self$W[[LETTERS[self$L+1]]] <- self$W[[LETTERS[self$L+1]]] + t(0.1*self$eval_till_layer(x[i],self$L)*(y[i]-self$calculate(x[i])))
-      self$W[[LETTERS[self$L]]] <- self$W[[LETTERS[self$L]]] + 0.1*t(self$W[[LETTERS[self$L+1]]])*self$eval_till_layer(x[i],self$L)*(y[i]-self$calculate(x[i]))
-    }
-  },
-
-  #' @description
-  #' Calculating gradient descent
-  #'
-  #' @param x A vector
-  #' @param y A vector
-  #' @export
-  GD3 = function(x,y,iteration=10,delta=0.02){
-    for (j in 1:iteration){
-      W_tmp <- vector(mode="list",length=self$L+1)
-      names(W_tmp) <- LETTERS[1:(self$L+1)]
-      d_tmp <- vector(mode="list",length=self$L+1)
-      names(d_tmp) <- LETTERS[1:(self$L+1)]
-      R1 <- sum((y-self$calculate2(x))^2)
-      for (k in 1:(self$L +1)){
-        W_tmp[[LETTERS[k]]] <- self$W[[LETTERS[k]]]
-        for (l in 1:length(self$W[[LETTERS[k]]])){
-          self$W[[LETTERS[k]]][l] <- self$W[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
-        }
-        d_tmp[[LETTERS[k]]] <- self$d[[LETTERS[k]]]
-        for (l in 1:length(self$d[[LETTERS[k]]])){
-          self$d[[LETTERS[k]]][l] <- self$d[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
-        }
-      }
-      R2 <- sum((y-self$calculate2(x))^2)
-      if (R1 < R2){
-        self$W <- W_tmp
-        self$d <- d_tmp
-
-      }
-
-      print(R1)
-      print(R2)
-      if (j %% 10){
-        print(j/10)
-      }
-    }
-
-  },
-
   #' @description
   #' Calculating stochastic gradient descent
   #'
@@ -469,54 +405,14 @@ NN <- R6Class("NN", list(
 
       m <- dim(x)[2]/n
       for (i in 1:(n)){
-        self$BP_klas(x[,(1+(i-1)*m):(i*m)],y[,(1+(i-1)*m):(i*m)],gam=delta)
+        self$BP_clas(x[,(1+(i-1)*m):(i*m)],y[,(1+(i-1)*m):(i*m)],gam=delta)
       }
       print("Epoche: ")
       print(j)
     }
   },
 
-  #' @description
-  #' Calculating random descent
-  #'
-  #' @param x A vector
-  #' @param y A vector
-  #' @param iteration A vector
-  #' @param delta A vector
-  #' @export
-  GD_clas = function(x,y,iteration=1000,delta=0.002){
-    for (j in 1:iteration){
-      W_tmp <- vector(mode="list",length=self$L+1)
-      names(W_tmp) <- LETTERS[1:(self$L+1)]
-      d_tmp <- vector(mode="list",length=self$L+1)
-      names(d_tmp) <- LETTERS[1:(self$L+1)]
-      R1 <- sum((y-self$cal_clas(x))^2)
-      for (k in 1:(self$L +1)){
-        W_tmp[[LETTERS[k]]] <- self$W[[LETTERS[k]]]
-        for (l in 1:length(self$W[[LETTERS[k]]])){
-          self$W[[LETTERS[k]]][l] <- self$W[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
-        }
-        d_tmp[[LETTERS[k]]] <- self$d[[LETTERS[k]]]
-        for (l in 1:length(self$d[[LETTERS[k]]])){
-          self$d[[LETTERS[k]]][l] <- self$d[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
-        }
-      }
-      R2 <- sum((y-self$cal_clas(x))^2)
-      if (R1 < R2){
-        self$W <- W_tmp
-        self$d <- d_tmp
-
-      }
-
-      print(R1)
-      print(R2)
-      if (j %% 10){
-        print(j/10)
-      }
-    }
-
-  },
-  # Durchführen von Backwardpropagation - Klassifikation
+  # Realization of backwardpropagation - classifikation
   #' @description
   #' Calculating gradient descent for classification
   #'
@@ -525,7 +421,7 @@ NN <- R6Class("NN", list(
   #' @param gam A vector
   #' @param lambda A vector
   #' @export
-  BP_klas = function(x,y, gam = 1e-4, lambda = 0){
+  BP_clas = function(x,y, gam = 1e-4, lambda = 0){
     if(!is.array(x)) {
       x <- matrix(x, nrow = 1)
     }
@@ -550,10 +446,7 @@ NN <- R6Class("NN", list(
 
       for (i in 1: dim(x)[2]){
         # Schritt 1 - Forwardpass und Definition von g_x, z und x_l
-        g_x <- self$cal_clas(matrix(x[,i],ncol=1))
-        # print(i)
-        # print(self$W[[LETTERS[self$L+1]]][1,])
-
+        g_x <- self$ffprop_clas(matrix(x[,i],ncol=1))
 
         z <- vector(mode="list",length=self$L)
         names(z) <- LETTERS[1:(self$L)]
@@ -582,14 +475,6 @@ NN <- R6Class("NN", list(
         for(m in 1:length(self$W[[LETTERS[self$L+1]]][,1])){
           C_w[[LETTERS[self$L+1]]][,m,i] <- -(y[,i] - g_x) * x_l[[LETTERS[self$L]]][m]
         }
-        # if(i == dim(x)[2]){
-        # cat("i",i, sep = " = ")
-        #
-        # print("delta_l[[LETTERS[self$L]]]")
-        # print(delta_l[[LETTERS[self$L]]])
-        # print("C_w[[LETTERS[self$L+1]]]")
-        # print(C_w[[LETTERS[self$L+1]]])
-        # }
       }
       # Schritt 2b
       for(i in 1:(dim(x)[2])){
@@ -646,25 +531,3 @@ NN <- R6Class("NN", list(
   }
 )
 )
-
-
-# # Beispiele
-# N1 <- NN$new(4,c(2,10,7,8,10,1))
-# x <- matrix(c(1,1,2,2), ncol = 2)
-# y <- c(1,1)
-#
-#
-# # N1$calculate2(x)
-# # N1$eval_till_layer_z(1:2,3)
-# # N1$eval_till_layer(1:2,3)
-# # N1$BP_reg(x,y)
-# # N1$W
-#
-# N2 <- NN$new(3,c(1,30,30,30,1))
-# x <- seq(-pi, pi, length.out=100)
-# x
-# y <- sin(x)
-# y
-# plot(x,y)
-# for(i in 1:10000){print(i); plot(x,N2$calculate2(x)); N2$BP_reg(x,y, gam = 1e-3)}
-
