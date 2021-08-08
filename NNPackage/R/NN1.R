@@ -90,19 +90,18 @@ id <- function(x){
 }
 
 
-#' The title for my S4 class that extends \code{"character"} class.
+#' S6 class that can generate Neural Networks
 #'
-#' Some details about this class and my plans for it in the body.
+#' In this class Neural Networks can be generated and optimized via different
+#' Gradient Descends Methods
 #'
-#' \describe{
-#' \item{L}{number of hidden layers}
+#' \describe{ \item{L}{number of hidden layers}
 #'
 #' \item{B}{width of each layer}
 #'
 #' \item{W}{weight matrices}
-#' #'
-#' \item{d}{width vector}
-#' }
+#'
+#' \item{d}{width vector} }
 #' @name NN
 #' @rdname NN
 #' @exportClass NN
@@ -128,8 +127,9 @@ NN <- R6Class("NN", list(
   #' @param max_gewicht a vector
   #' @return A vector of solutions of \code{x}
   #' @export
-  initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1),d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
-    stopifnot(length(B) == L+2)
+  initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1), d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
+    L <- lenght(B)-2
+    stopifnot(L < 1)
     self$W <- vector(mode="list",length=L+1)
     self$L <- L
     self$B <- B

@@ -4,25 +4,22 @@
 \alias{NN}
 \title{The title for my S4 class that extends \code{"character"} class.}
 \description{
-Some details about this class and my plans for it in the body.
+The title for my S4 class that extends \code{"character"} class.
+
+The title for my S4 class that extends \code{"character"} class.
 }
 \details{
+Some details about this class and my plans for it in the body.
+
 \describe{
-\item{myslot1}{A logical keeping track of something.}
+\item{L}{number of hidden layers}
 
-\item{myslot2}{An integer specifying something else.}
+\item{B}{width of each layer}
 
-\item{myslot3}{A data.frame holding some data.}
+\item{W}{weight matrices}
+#'
+\item{d}{width vector}
 }
-}
-\examples{
-
-## ------------------------------------------------
-## Method `NN$calculate2`
-## ------------------------------------------------
-
-id(1)
-id(1:100)
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -66,6 +63,7 @@ id(1:100)
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Initializing a NN
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$new(
   L = 1,
@@ -77,11 +75,32 @@ id(1:100)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{L}}{a vector}
+
+\item{\code{B}}{a vector}
+
+\item{\code{W}}{a vector}
+
+\item{\code{d}}{a vector}
+
+\item{\code{min_gewicht}}{a vector}
+
+\item{\code{max_gewicht}}{a vector}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A vector of solutions of \code{x}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-calculate2"></a>}}
 \if{latex}{\out{\hypertarget{method-calculate2}{}}}
 \subsection{Method \code{calculate2()}}{
+Calculating the function of NN
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$calculate2(x = 1)}\if{html}{\out{</div>}}
 }
@@ -93,54 +112,84 @@ id(1:100)
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Returns}{
-A vector of solutions of \code{x}
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{id(1)
-id(1:100)
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_clas"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_clas}{}}}
 \subsection{Method \code{cal_clas()}}{
+Calculating feed forward with softmax
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$cal_clas(x = 1)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-eval_till_layer"></a>}}
 \if{latex}{\out{\hypertarget{method-eval_till_layer}{}}}
 \subsection{Method \code{eval_till_layer()}}{
+Calculating NN up to a certain layer
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$eval_till_layer(x = 1, Layer = 1)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{L}}{A vector}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-eval_till_layer_z"></a>}}
 \if{latex}{\out{\hypertarget{method-eval_till_layer_z}{}}}
 \subsection{Method \code{eval_till_layer_z()}}{
+Calculating NN up to a certain layer without activation function in last step
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$eval_till_layer_z(x = 1, Layer = 1)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{L}}{A vector}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BP_reg"></a>}}
 \if{latex}{\out{\hypertarget{method-BP_reg}{}}}
 \subsection{Method \code{BP_reg()}}{
+Calculating gradient descent for regression
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$BP_reg(x, y, gam = 1e-04, lambda = 0)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{y}}{A vector}
+
+\item{\code{gam}}{A vector}
+
+\item{\code{lambda}}{A vector}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-GD"></a>}}
@@ -164,37 +213,91 @@ id(1:100)
 \if{html}{\out{<a id="method-GD3"></a>}}
 \if{latex}{\out{\hypertarget{method-GD3}{}}}
 \subsection{Method \code{GD3()}}{
+Calculating gradient descent
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$GD3(x, y, iteration = 10, delta = 0.02)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{y}}{A vector}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-SGD"></a>}}
 \if{latex}{\out{\hypertarget{method-SGD}{}}}
 \subsection{Method \code{SGD()}}{
+Calculating stochastic gradient descent
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$SGD(x, y, n, delta = 0.01, iteration = 10)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{y}}{A vector}
+
+\item{\code{n}}{a vector}
+
+\item{\code{delta}}{a vector}
+
+\item{\code{iteration}}{a vector}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-GD_clas"></a>}}
 \if{latex}{\out{\hypertarget{method-GD_clas}{}}}
 \subsection{Method \code{GD_clas()}}{
+Calculating random descent
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$GD_clas(x, y, iteration = 1000, delta = 0.002)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{y}}{A vector}
+
+\item{\code{iteration}}{A vector}
+
+\item{\code{delta}}{A vector}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BP_klas"></a>}}
 \if{latex}{\out{\hypertarget{method-BP_klas}{}}}
 \subsection{Method \code{BP_klas()}}{
+Calculating gradient descent for classification
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$BP_klas(x, y, gam = 1e-04, lambda = 0)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{y}}{A vector}
+
+\item{\code{gam}}{A vector}
+
+\item{\code{lambda}}{A vector}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
