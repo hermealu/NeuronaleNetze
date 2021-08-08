@@ -160,20 +160,6 @@ NN <- R6Class("NN", list(
     self$theta[L+1] <- self$W[L+1]
 
   },
-  #calculate führt die funktion des NN aus
-  # calculate = function(x=1){
-  #   for (j in (1:length(x))){
-  #     h <- x[j]
-  #     if (self$L >= 1){
-  #       for (i in LETTERS[1:(self$L)]){
-  #         h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
-  #       }
-  #     }
-  #     h <- self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]]
-  #     x[j] <- h
-  #   }
-  #   return(x)
-  # },
 
   #' @description
   #' Calculating the function of NN
@@ -232,18 +218,6 @@ NN <- R6Class("NN", list(
       return(y)
     }
 
-    y <- matrix(1,nrow=length(x),ncol=self$B[self$L+2])
-    for (j in (1:length(x))){
-      h <- x[j]
-      if (self$L >= 1){
-        for (i in LETTERS[1:(self$L)]){
-          h <- self$f(self$d[[i]] + h %*% self$W[[i]]) #letzter Schritt ist ohne Aktivierungsfunktion
-        }
-      }
-      h <- softmax(self$d[[LETTERS[(self$L+1)]]] + h %*% self$W[[LETTERS[(self$L+1)]]])
-      y[j,] <- h
-    }
-    return(y)
   },
 
   #' @description
@@ -342,11 +316,14 @@ NN <- R6Class("NN", list(
         }
 
         # Schritt 2b
-        for(l in (self$L-1):1){
-          # Berechne delta^(l)
-          delta_l[[LETTERS[l]]] <- (delta_l[[LETTERS[l+1]]] %*% t(self$W[[LETTERS[l+1]]])) *
-            self$del_f(z[[LETTERS[l]]])
+        if(self$L > 1){
+          for(l in (self$L-1):1){
+            # Berechne delta^(l)
+            delta_l[[LETTERS[l]]] <- (delta_l[[LETTERS[l+1]]] %*% t(self$W[[LETTERS[l+1]]])) *
+              self$del_f(z[[LETTERS[l]]])
+          }
         }
+
 
         # Berechne C_v
         for(l in (self$L):1){
@@ -478,6 +455,26 @@ NN <- R6Class("NN", list(
     }
   },
 
+  SGD_clas = function(x,y,n,delta=1e-2,iteration=10){
+    if(!is.array(x)) {x <- matrix(x,nrow=1); y <- matrix(y,nrow=1)}
+    for (j in 1:iteration){
+      stopifnot(dim(x)[2] %% n == 0)
+      c <- sample(1:(dim(x)[2]))
+      for (i in 1:(dim(x)[1])){
+        x[i,] <- x[i,][c]
+      }
+      for (i in 1:(dim(y)[1])){
+        y[i,] <- y[i,][c]
+      }
+
+      m <- dim(x)[2]/n
+      for (i in 1:(n)){
+        self$BP_klas(x[,(1+(i-1)*m):(i*m)],y[,(1+(i-1)*m):(i*m)],gam=delta)
+      }
+      print("Epoche: ")
+      print(j)
+    }
+  },
 
   #' @description
   #' Calculating random descent
@@ -553,7 +550,10 @@ NN <- R6Class("NN", list(
 
       for (i in 1: dim(x)[2]){
         # Schritt 1 - Forwardpass und Definition von g_x, z und x_l
-        g_x <- self$calculate2(matrix(x[,i],ncol=1))
+        g_x <- self$cal_clas(matrix(x[,i],ncol=1))
+        # print(i)
+        # print(self$W[[LETTERS[self$L+1]]][1,])
+
 
         z <- vector(mode="list",length=self$L)
         names(z) <- LETTERS[1:(self$L)]
@@ -569,19 +569,36 @@ NN <- R6Class("NN", list(
         }
 
         # Schritt 2a - Berechnung delta^(L) und der Ableitungen C_w[1,m]^(L+1)
-        delta_l[[LETTERS[self$L]]] <- (-2*(y[i]-g_x) %*% t(self$W[[LETTERS[self$L+1]]])) *self$del_f(z[[LETTERS[self$L]]])
+
+        secondterm <- 0
+        for(k in 1:(dim(self$W[[LETTERS[self$L+1]]])[2])){
+          secondterm <- secondterm + g_x[k]*self$W[[LETTERS[self$L+1]]][k,]
+        }
+
+        delta_l[[LETTERS[self$L]]] <- -(self$W[[LETTERS[self$L+1]]][y[,i],] - secondterm)*
+          self$del_f(z[[LETTERS[self$L]]])
 
         # Berechnung von C_w[L+1]
         for(m in 1:length(self$W[[LETTERS[self$L+1]]][,1])){
-          C_w[[LETTERS[self$L+1]]][1,m,i] <- -2*(y[i] - g_x)*x_l[[LETTERS[self$L]]][m]
-
+          C_w[[LETTERS[self$L+1]]][,m,i] <- -(y[,i] - g_x) * x_l[[LETTERS[self$L]]][m]
         }
-
-        # Schritt 2b
-        for(l in (self$L-1):1){
-          # Berechne delta^(l)
-          delta_l[[LETTERS[l]]] <- (delta_l[[LETTERS[l+1]]] %*% t(self$W[[LETTERS[l+1]]])) *
-            self$del_f(z[[LETTERS[l]]])
+        # if(i == dim(x)[2]){
+        # cat("i",i, sep = " = ")
+        #
+        # print("delta_l[[LETTERS[self$L]]]")
+        # print(delta_l[[LETTERS[self$L]]])
+        # print("C_w[[LETTERS[self$L+1]]]")
+        # print(C_w[[LETTERS[self$L+1]]])
+        # }
+      }
+      # Schritt 2b
+      for(i in 1:(dim(x)[2])){
+        if(self$L >1){
+          for(l in (self$L-1):1){
+            # Berechne delta^(l)
+            delta_l[[LETTERS[l]]] <- (delta_l[[LETTERS[l+1]]] %*% t(self$W[[LETTERS[l+1]]])) *
+              self$del_f(z[[LETTERS[l]]])
+          }
         }
 
         # Berechne C_v
@@ -631,9 +648,6 @@ NN <- R6Class("NN", list(
 )
 
 
-
-
-
 # # Beispiele
 # N1 <- NN$new(4,c(2,10,7,8,10,1))
 # x <- matrix(c(1,1,2,2), ncol = 2)
@@ -654,71 +668,3 @@ NN <- R6Class("NN", list(
 # plot(x,y)
 # for(i in 1:10000){print(i); plot(x,N2$calculate2(x)); N2$BP_reg(x,y, gam = 1e-3)}
 
-
-
-#lines <- read_lines("R_project/tic-tac-toe.data")
-#lines2 <- read_lines("R_project/poker-hand-testing.data")
-#lines2 %>%
-# str_extract_all("[:digit:]+") ->
-#  poker1
-#poker2 <- as.numeric(unlist(poker1))
-
-#poker <- matrix(poker2, nrow = 11)
-#lines %>%
-#str_replace_all("negative","0") %>%
-#str_replace_all("positive","1") %>%
-#str_replace_all("x","1") %>%
-#str_replace_all("o","3") %>%
-#str_replace_all("b","2") %>%
-#str_extract_all("[:digit:]") ->
-#tic_tac1
-
-
-#tic_tac2 <- as.numeric(unlist(tic_tac1))
-#tic_tac <- matrix(tic_tac2, nrow = 10)
-
-#x_poker <- poker[-11,]
-
-#x <- tic_tac[-10,1:950]
-#x_all <- tic_tac[-10,]
-
-
-#y <- tic_tac[10,1:950]
-#y_poker <- poker[11,]
-
-
-#y1 <- cbind(y,integer(length(y)))
-#for (i in 1:length(y)){
-# if(y[i]==0) y1[i,2] <- 1
-#}
-#y_poker1 <- cbind(y_poker,integer(length(y_poker)))
-#for (i in 1:length(y_poker)){
-# if(y_poker[i]==0) y_poker1[i,2] <- 1
-#if(y_poker[i]!=0) y_poker1[i,1] <- 1
-#}
-
-
-#y_poker1
-
-#N1 <- NN$new(4,c(10,50,50,50,50,2))
-
-#N1$GD_clas(x_poker,y_poker1,iteration = 1000,delta=0.02)
-
-
-
-#N1$cal_clas(x_poker[,1:2])
-
-
-
-
-#N1$GD(xs,xs,iterations=100)
-#y <- N1$calculate(x)
-#lines(x,y,col="black")
-#N1$GD(xs,xs,iterations=200)
-#y <- N1$calculate(x)
-#lines(x,y,col="orange")
-#lines(x,x,col="purple")
-#legend(-10, 5, legend=c("start", "25 Schritte","50 Schritte","100 Schritte","200 Schritte","echte funktion"),
-#       col=c("red", "blue","green","black","orange","purple"),lty=1,  cex=0.8)
-#N1$W
-#N1$J
