@@ -129,7 +129,7 @@ NN <- R6Class("NN", list(
   #' @export
   initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1), d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
     L <- lenght(B)-2
-    stopifnot(L < 1)
+    stopifnot(L >= 1)
     self$W <- vector(mode="list",length=L+1)
     self$L <- L
     self$B <- B
