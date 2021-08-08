@@ -251,6 +251,39 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
+  #' Calculating gradient descent
+  #'
+  #' @param x A vector
+  #' @param y A vector
+  #' @export
+  GD3 = function(x,y,iteration=10,delta=0.02){
+    for (j in 1:iteration){
+      W_tmp <- vector(mode="list",length=self$L+1)
+      names(W_tmp) <- LETTERS[1:(self$L+1)]
+      d_tmp <- vector(mode="list",length=self$L+1)
+      names(d_tmp) <- LETTERS[1:(self$L+1)]
+      R1 <- sum((y-self$ffprop(x))^2)
+      for (k in 1:(self$L +1)){
+        W_tmp[[LETTERS[k]]] <- self$W[[LETTERS[k]]]
+        for (l in 1:length(self$W[[LETTERS[k]]])){
+          self$W[[LETTERS[k]]][l] <- self$W[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
+        }
+        d_tmp[[LETTERS[k]]] <- self$d[[LETTERS[k]]]
+        for (l in 1:length(self$d[[LETTERS[k]]])){
+          self$d[[LETTERS[k]]][l] <- self$d[[LETTERS[k]]][l] + runif(1,min=-delta,max=delta)
+        }
+      }
+      R2 <- sum((y-self$ffprop(x))^2)
+      if (R1 < R2){
+        self$W <- W_tmp
+        self$d <- d_tmp
+
+      }
+    }
+
+  },
+
+  #' @description
   #' Calculating gradient descent for regression
   #'
   #' @param x A vector
@@ -407,8 +440,6 @@ NN <- R6Class("NN", list(
       for (i in 1:(n)){
         self$BP_clas(x[,(1+(i-1)*m):(i*m)],y[,(1+(i-1)*m):(i*m)],gam=delta)
       }
-      print("Epoche: ")
-      print(j)
     }
   },
 

@@ -1,0 +1,49 @@
+---
+title: "Vergleich"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vergleich}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(NNPackage)
+```
+Zunächst werden die Daten erstellt.
+```{r}
+x <- seq(0,2*pi, length.out = 100)
+y <- sin(x) + runif(length(x),min=-0.1,max=0.1)
+plot(x,y,type="l")
+```
+Nun werden drei gleiche Neuronale Netzwerke erstellt, um verschiedene Optimizer zu vergleichen.
+Zu Beginn der Random Descend, der schnell ist, aber nur für einfache Probleme gut geeignet ist.
+```{r}
+N1 <- NN$new(B=c(1,30,30,30,1))
+N2 <- NN$new(3,B=c(1,30,30,30,1))
+N3 <- NN$new(B=c(1,30,30,30,1))
+```
+Nun wenden wir die verschiedenen Optimizer auf die Netwerke an.
+```{r}
+N1$GD3(x,y,iteration = 1000, delta = 0.02)
+plot(x,y,type="l")
+lines(x,N1$ffprop(x),col="red")
+```
+Als nächstes der normale Gradient Descend.
+```{r}
+for (i in 1:10){print(i);N2$BP_reg(x,y, gam = 0.01)}
+plot(x,y,type="l")
+lines(x,N2$ffprop(x),col="red")
+```
+```{r}
+N2$SGD(x,y,n=10,iteration=100, delta = 0.01)
+plot(x,y,type="l")
+lines(x,N2$ffprop(x),col="red")
+```

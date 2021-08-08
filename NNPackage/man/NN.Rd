@@ -30,10 +30,11 @@ Gradient Descends Methods
 \item \href{#method-ffprop_clas}{\code{NN$ffprop_clas()}}
 \item \href{#method-eval_till_layer}{\code{NN$eval_till_layer()}}
 \item \href{#method-eval_till_layer_z}{\code{NN$eval_till_layer_z()}}
+\item \href{#method-GD3}{\code{NN$GD3()}}
 \item \href{#method-BP_reg}{\code{NN$BP_reg()}}
 \item \href{#method-SGD}{\code{NN$SGD()}}
 \item \href{#method-SGD_clas}{\code{NN$SGD_clas()}}
-\item \href{#method-BP_klas}{\code{NN$BP_klas()}}
+\item \href{#method-BP_clas}{\code{NN$BP_clas()}}
 \item \href{#method-clone}{\code{NN$clone()}}
 }
 }
@@ -165,6 +166,25 @@ Calculating NN up to a certain layer without activation function in last step
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-GD3"></a>}}
+\if{latex}{\out{\hypertarget{method-GD3}{}}}
+\subsection{Method \code{GD3()}}{
+Calculating gradient descent
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{NN$GD3(x, y, iteration = 10, delta = 0.02)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector}
+
+\item{\code{y}}{A vector}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BP_reg"></a>}}
 \if{latex}{\out{\hypertarget{method-BP_reg}{}}}
 \subsection{Method \code{BP_reg()}}{
@@ -222,12 +242,12 @@ Calculating stochastic gradient descent
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-BP_klas"></a>}}
-\if{latex}{\out{\hypertarget{method-BP_klas}{}}}
-\subsection{Method \code{BP_klas()}}{
+\if{html}{\out{<a id="method-BP_clas"></a>}}
+\if{latex}{\out{\hypertarget{method-BP_clas}{}}}
+\subsection{Method \code{BP_clas()}}{
 Calculating gradient descent for classification
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$BP_klas(x, y, gam = 1e-04, lambda = 0)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$BP_clas(x, y, gam = 1e-04, lambda = 0)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
