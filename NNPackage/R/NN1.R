@@ -201,7 +201,7 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating feedworward propagation up to a certain layer Layer
+  #' Calculating feedforward propagation up to a certain layer Layer
   #'
   #' @param x A vector or array
   #' @param Layer A scalar smaller than or equal as L+1 and bigger than 0.
@@ -214,7 +214,7 @@ NN <- R6Class("NN", list(
     }
     if (self$L >= 1){
       h <- x
-      for (i in LETTERS[1:(Layer)]){  # Kann das von 1 laufen? Was ist mit dem Input?
+      for (i in LETTERS[1:(Layer)]){
         h <- self$f(self$d[[i]] + h %*% self$W[[i]] )
       }
 
@@ -224,7 +224,7 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating feedforward propagation up to a certain layer without activation function in last step
+  #' Calculating feedforward propagation up to a certain layer without activation function in the last step
   #'
   #' @param x A vector or array
   #' @param Layer A scalar smaller than or equal as L+1 and bigger than 0.
@@ -244,7 +244,7 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the input of the training
+  #' @param y A vector or array with rows representing the output of the training
   #'   data and columns representing the number of different training data
   #' @param delta A scalar between 0 and 1 that determines how much the weights change
   #' @param iteration a scalar that represents the times the full data is applied in the algorithm
@@ -281,9 +281,9 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the input of the training
+  #' @param y A vector or array with rows representing the output of the training
   #'   data and columns representing the number of different training data
-  #' @param gam A scalar between zero and 1
+  #' @param gam A scalar between zero and 1 that determines how much the weights change
   #' @export
   # Realization of backwardpropagation - regression
   BP_reg = function(x,y, gam = 1e-4){
@@ -393,7 +393,7 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the input of the training
+  #' @param y A vector or array with rows representing the output of the training
   #'   data and columns representing the number of different training data
   #' @param n a vector
   #' @param delta A scalar between 0 and 1 that determines how much the weights change
@@ -420,7 +420,7 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the input of the training
+  #' @param y A vector or array with rows representing the output of the training
   #'   data and columns representing the number of different training data
   #' @param n a vector
   #' @param delta A scalar between 0 and 1 that determines how much the weights change
@@ -451,7 +451,7 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the input of the training
+  #' @param y A vector or array with rows representing the output of the training
   #'   data and columns representing the number of different training data
   #' @param gam A scalar between 0 and 1 that determines how much the weights change
   #' @export
