@@ -74,22 +74,6 @@ del_tanh <- function(x){
   return(4/((exp(-x)+exp(x))^2))
 }
 
-
-#' Identity
-#'
-#' Calculating the identity of a vector
-#'
-#' @param x A vector.
-#' @return A vector of solutions of \code{x}
-#' @examples
-#' id(1)
-#' id(1:100)
-#' @export
-id <- function(x){
-  return(x)
-}
-
-
 #' S6 class that can generate Neural Networks
 #'
 #' In this class Neural Networks can be generated and optimized via different
@@ -117,15 +101,15 @@ NN <- R6Class("NN", list(
 
   #' @description
   #'
-  #' Initializing a NN
+  #' Initializing a neural network
   #'
-  #' @param L a vector
-  #' @param B a vector
-  #' @param W a vector
-  #' @param d a vector
-  #' @param min_gewicht a vector
-  #' @param max_gewicht a vector
-  #' @return A vector of solutions of \code{x}
+  #' @param L a scalar, which refers to the number of hidden layers
+  #' @param B a atomic vector, which contains the width of the input, the hidden layers and the output
+  #' @param W a list with length L+1, which contains matrix-inputs of the weight matrices of the neural network
+  #' @param d a list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network
+  #' @param min_gewicht a scalar, which sets the minimal number that can appear in a weight matrix
+  #' @param max_gewicht a scalar, which sets the maximal number that can appear in a weight matrix
+  #' @return A R6 object, which contains the parameters of a neural network and methods for its optimization
   #' @export
   initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1), d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
     L <- length(B)-2
@@ -155,9 +139,9 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating the function of NN
+  #' Calculate feedforward propagation for regression of a neural network
   #'
-  #' @param x A vector.
+  #' @param x A atomic vector or an array, which represents the input of the network
   #' @export
   # Feedforward propagation - regression
   ffprop = function(x=1){
@@ -191,9 +175,9 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating feed forward with softmax
+  #' Calculating feed forward propagation for classification with softmax
   #'
-  #' @param x A vector.
+  #' @param x An array, which represents the input of the network
   #' @export
   # Feedwordward propagation - classification
   ffprop_clas = function(x=1){
@@ -216,12 +200,14 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating NN up to a certain layer
+  #' Calculating feedworward propagation up to a certain layer Layer
   #'
-  #' @param x A vector
-  #' @param L A vector
-  #' @export
+  #' @param x A vector or array
+  #' @param Layer A scalar smaller than or equal as L+1 and bigger than 0.
+
   eval_till_layer = function(x=1,Layer=1){
+    stopifnot("Layer has to be smaller than L+2!" = Layer <= self$L+1)
+    stopifnot("Layer has to be bigger than 0!" = Layer >= 1)
     if (Layer == self$L +1){
       x <- self$ffprop(x)
     }
@@ -237,12 +223,13 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating NN up to a certain layer without activation function in last step
+  #' Calculating feedforward propagation up to a certain layer without activation function in last step
   #'
-  #' @param x A vector
-  #' @param L A vector
-  #' @export
+  #' @param x A vector or array
+  #' @param Layer A scalar smaller than or equal as L+1 and bigger than 0.
   eval_till_layer_z = function(x=1,Layer=1){
+    stopifnot("Layer has to be smaller than L+2!" = Layer <= self$L+1)
+    stopifnot("Layer has to be bigger than 0!" = Layer >= 1)
     if(Layer > 1) evx <- self$eval_till_layer(x, Layer-1)
     if(Layer == 1) evx <- x
     h <- self$d[[LETTERS[Layer]]] + evx %*% self$W[[LETTERS[Layer]]]
@@ -251,11 +238,12 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating gradient descent
-  #'
-  #' @param x A vector
-  #' @param y A vector
-  #' @export
+  #' Method, which calculates a randomn descent for a neural network
+    #' Calculating gradient descent
+    #'
+    #' @param x A vector
+    #' @param y A vector
+    #' @export
   GD3 = function(x,y,iteration=10,delta=0.02){
     for (j in 1:iteration){
       W_tmp <- vector(mode="list",length=self$L+1)
@@ -284,15 +272,14 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Calculating gradient descent for regression
+  #' A Method, which calculates the Gradient Decent for regression for a neural network
   #'
-  #' @param x A vector
-  #' @param y A vector
-  #' @param gam A vector
-  #' @param lambda A vector
+  #' @param x A vector or array with rows representing the input of the training data and columns representing the number of different training data
+  #' @param y A vector or array with rows representing the input of the training data and columns representing the number of different training data
+  #' @param gam A scalar between zero and 1
   #' @export
   # Realization of backwardpropagation - regression
-  BP_reg = function(x,y, gam = 1e-4, lambda = 0){
+  BP_reg = function(x,y, gam = 1e-4){
     if(!is.array(x)) {
       x <- matrix(x, nrow = 1)
     }
@@ -385,8 +372,7 @@ NN <- R6Class("NN", list(
           for(m in 1:dim(self$W[[LETTERS[l]]])[1]){
             sum <- 0
             for(i in 1:n){
-              sum <- sum + C_w[[LETTERS[l]]][j,m,i] +
-                2*lambda * self$W[[LETTERS[l]]][m,j]
+              sum <- sum + C_w[[LETTERS[l]]][j,m,i]
             }
             self$W[[LETTERS[l]]][m,j] <- self$W[[LETTERS[l]]][m,j] -
               gam*(1/n)*sum
@@ -452,7 +438,7 @@ NN <- R6Class("NN", list(
   #' @param gam A vector
   #' @param lambda A vector
   #' @export
-  BP_clas = function(x,y, gam = 1e-4, lambda = 0){
+  BP_clas = function(x,y, gam = 1e-4){
     if(!is.array(x)) {
       x <- matrix(x, nrow = 1)
     }
@@ -549,8 +535,7 @@ NN <- R6Class("NN", list(
           for(m in 1:dim(self$W[[LETTERS[l]]])[1]){
             sum <- 0
             for(i in 1:n){
-              sum <- sum + C_w[[LETTERS[l]]][j,m,i] +
-                2*lambda * self$W[[LETTERS[l]]][m,j]
+              sum <- sum + C_w[[LETTERS[l]]][j,m,i]
             }
             self$W[[LETTERS[l]]][m,j] <- self$W[[LETTERS[l]]][m,j] -
               gam*(1/n)*sum
