@@ -30,7 +30,7 @@ Gradient Descends Methods
 \item \href{#method-ffprop_clas}{\code{NN$ffprop_clas()}}
 \item \href{#method-eval_till_layer}{\code{NN$eval_till_layer()}}
 \item \href{#method-eval_till_layer_z}{\code{NN$eval_till_layer_z()}}
-\item \href{#method-GD3}{\code{NN$GD3()}}
+\item \href{#method-GD}{\code{NN$GD()}}
 \item \href{#method-BP_reg}{\code{NN$BP_reg()}}
 \item \href{#method-SGD}{\code{NN$SGD()}}
 \item \href{#method-SGD_clas}{\code{NN$SGD_clas()}}
@@ -60,7 +60,7 @@ Gradient Descends Methods
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
-Initializing a NN
+Initializing a neural network
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$new(
   L = 1,
@@ -75,29 +75,29 @@ Initializing a NN
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{L}}{a vector}
+\item{\code{L}}{a scalar, which refers to the number of hidden layers}
 
-\item{\code{B}}{a vector}
+\item{\code{B}}{a atomic vector, which contains the width of the input, the hidden layers and the output}
 
-\item{\code{W}}{a vector}
+\item{\code{W}}{a list with length L+1, which contains matrix-inputs of the weight matrices of the neural network}
 
-\item{\code{d}}{a vector}
+\item{\code{d}}{a list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network}
 
-\item{\code{min_gewicht}}{a vector}
+\item{\code{min_gewicht}}{a scalar, which sets the minimal number that can appear in a weight matrix}
 
-\item{\code{max_gewicht}}{a vector}
+\item{\code{max_gewicht}}{a scalar, which sets the maximal number that can appear in a weight matrix}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A vector of solutions of \code{x}
+A R6 object, which contains the parameters of a neural network and methods for its optimization
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ffprop"></a>}}
 \if{latex}{\out{\hypertarget{method-ffprop}{}}}
 \subsection{Method \code{ffprop()}}{
-Calculating the function of NN
+Calculate feedforward propagation for regression of a neural network
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$ffprop(x = 1)}\if{html}{\out{</div>}}
 }
@@ -105,7 +105,7 @@ Calculating the function of NN
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector.}
+\item{\code{x}}{A atomic vector or an array, which represents the input of the network}
 }
 \if{html}{\out{</div>}}
 }
@@ -114,7 +114,7 @@ Calculating the function of NN
 \if{html}{\out{<a id="method-ffprop_clas"></a>}}
 \if{latex}{\out{\hypertarget{method-ffprop_clas}{}}}
 \subsection{Method \code{ffprop_clas()}}{
-Calculating feed forward with softmax
+Calculating feed forward propagation for classification with softmax
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$ffprop_clas(x = 1)}\if{html}{\out{</div>}}
 }
@@ -122,7 +122,7 @@ Calculating feed forward with softmax
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector.}
+\item{\code{x}}{An array, which represents the input of the network}
 }
 \if{html}{\out{</div>}}
 }
@@ -131,7 +131,7 @@ Calculating feed forward with softmax
 \if{html}{\out{<a id="method-eval_till_layer"></a>}}
 \if{latex}{\out{\hypertarget{method-eval_till_layer}{}}}
 \subsection{Method \code{eval_till_layer()}}{
-Calculating NN up to a certain layer
+Calculating feedworward propagation up to a certain layer Layer
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$eval_till_layer(x = 1, Layer = 1)}\if{html}{\out{</div>}}
 }
@@ -139,9 +139,9 @@ Calculating NN up to a certain layer
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector}
+\item{\code{x}}{A vector or array}
 
-\item{\code{L}}{A vector}
+\item{\code{Layer}}{A scalar smaller than or equal as L+1 and bigger than 0.}
 }
 \if{html}{\out{</div>}}
 }
@@ -150,7 +150,7 @@ Calculating NN up to a certain layer
 \if{html}{\out{<a id="method-eval_till_layer_z"></a>}}
 \if{latex}{\out{\hypertarget{method-eval_till_layer_z}{}}}
 \subsection{Method \code{eval_till_layer_z()}}{
-Calculating NN up to a certain layer without activation function in last step
+Calculating feedforward propagation up to a certain layer without activation function in last step
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$eval_till_layer_z(x = 1, Layer = 1)}\if{html}{\out{</div>}}
 }
@@ -158,28 +158,35 @@ Calculating NN up to a certain layer without activation function in last step
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector}
+\item{\code{x}}{A vector or array}
 
-\item{\code{L}}{A vector}
+\item{\code{Layer}}{A scalar smaller than or equal as L+1 and bigger than 0.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GD3"></a>}}
-\if{latex}{\out{\hypertarget{method-GD3}{}}}
-\subsection{Method \code{GD3()}}{
+\if{html}{\out{<a id="method-GD"></a>}}
+\if{latex}{\out{\hypertarget{method-GD}{}}}
+\subsection{Method \code{GD()}}{
+Method, which calculates a random descent for a neural network
 Calculating gradient descent
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$GD3(x, y, iteration = 10, delta = 0.02)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$GD(x, y, iteration = 10, delta = 0.02)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector}
+\item{\code{x}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector}
+\item{\code{y}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
+
+\item{\code{iteration}}{a scalar that represents the times the full data is applied in the algorithm}
+
+\item{\code{delta}}{A scalar between 0 and 1 that determines how much the weights change}
 }
 \if{html}{\out{</div>}}
 }
@@ -188,21 +195,21 @@ Calculating gradient descent
 \if{html}{\out{<a id="method-BP_reg"></a>}}
 \if{latex}{\out{\hypertarget{method-BP_reg}{}}}
 \subsection{Method \code{BP_reg()}}{
-Calculating gradient descent for regression
+A Method, which calculates the Gradient Decent for regression for a neural network
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$BP_reg(x, y, gam = 1e-04, lambda = 0)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$BP_reg(x, y, gam = 1e-04)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector}
+\item{\code{x}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector}
+\item{\code{y}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
 
-\item{\code{gam}}{A vector}
-
-\item{\code{lambda}}{A vector}
+\item{\code{gam}}{A scalar between zero and 1}
 }
 \if{html}{\out{</div>}}
 }
@@ -219,15 +226,17 @@ Calculating stochastic gradient descent
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector}
+\item{\code{x}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector}
+\item{\code{y}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
 
 \item{\code{n}}{a vector}
 
-\item{\code{delta}}{a vector}
+\item{\code{delta}}{A scalar between 0 and 1 that determines how much the weights change}
 
-\item{\code{iteration}}{a vector}
+\item{\code{iteration}}{a scalar that represents the times the full data is applied in the algorithm}
 }
 \if{html}{\out{</div>}}
 }
@@ -236,10 +245,28 @@ Calculating stochastic gradient descent
 \if{html}{\out{<a id="method-SGD_clas"></a>}}
 \if{latex}{\out{\hypertarget{method-SGD_clas}{}}}
 \subsection{Method \code{SGD_clas()}}{
+Calculating stochastic gradient descent for classification
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$SGD_clas(x, y, n, delta = 0.01, iteration = 10)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
+
+\item{\code{y}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
+
+\item{\code{n}}{a vector}
+
+\item{\code{delta}}{A scalar between 0 and 1 that determines how much the weights change}
+
+\item{\code{iteration}}{a scalar that represents the times the full data is applied in the algorithm}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BP_clas"></a>}}
@@ -247,19 +274,19 @@ Calculating stochastic gradient descent
 \subsection{Method \code{BP_clas()}}{
 Calculating gradient descent for classification
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$BP_clas(x, y, gam = 1e-04, lambda = 0)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$BP_clas(x, y, gam = 1e-04)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A vector}
+\item{\code{x}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector}
+\item{\code{y}}{A vector or array with rows representing the input of the training
+data and columns representing the number of different training data}
 
-\item{\code{gam}}{A vector}
-
-\item{\code{lambda}}{A vector}
+\item{\code{gam}}{A scalar between 0 and 1 that determines how much the weights change}
 }
 \if{html}{\out{</div>}}
 }

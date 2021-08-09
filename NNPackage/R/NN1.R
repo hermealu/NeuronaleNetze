@@ -181,6 +181,7 @@ NN <- R6Class("NN", list(
   #' @export
   # Feedwordward propagation - classification
   ffprop_clas = function(x=1){
+    stopifnot("x has to be an array!" = is.array(x))
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
       for (j in (1:(dim(x)[2]))){
@@ -238,13 +239,17 @@ NN <- R6Class("NN", list(
   },
 
   #' @description
-  #' Method, which calculates a randomn descent for a neural network
-    #' Calculating gradient descent
-    #'
-    #' @param x A vector
-    #' @param y A vector
-    #' @export
-  GD3 = function(x,y,iteration=10,delta=0.02){
+  #' Method, which calculates a random descent for a neural network
+  #' Calculating gradient descent
+  #'
+  #' @param x A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param y A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param delta A scalar between 0 and 1 that determines how much the weights change
+  #' @param iteration a scalar that represents the times the full data is applied in the algorithm
+  #' @export
+  GD = function(x,y,iteration=10,delta=0.02){
     for (j in 1:iteration){
       W_tmp <- vector(mode="list",length=self$L+1)
       names(W_tmp) <- LETTERS[1:(self$L+1)]
@@ -274,8 +279,10 @@ NN <- R6Class("NN", list(
   #' @description
   #' A Method, which calculates the Gradient Decent for regression for a neural network
   #'
-  #' @param x A vector or array with rows representing the input of the training data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the input of the training data and columns representing the number of different training data
+  #' @param x A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param y A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
   #' @param gam A scalar between zero and 1
   #' @export
   # Realization of backwardpropagation - regression
@@ -283,7 +290,6 @@ NN <- R6Class("NN", list(
     if(!is.array(x)) {
       x <- matrix(x, nrow = 1)
     }
-
     if(is.array(x)){
       n <- dim(x)[2]
 
@@ -379,18 +385,19 @@ NN <- R6Class("NN", list(
           }
         }
       }
-      return(self$W)
     }
   },
 
   #' @description
   #' Calculating stochastic gradient descent
   #'
-  #' @param x A vector
-  #' @param y A vector
+  #' @param x A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param y A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
   #' @param n a vector
-  #' @param delta a vector
-  #' @param iteration a vector
+  #' @param delta A scalar between 0 and 1 that determines how much the weights change
+  #' @param iteration a scalar that represents the times the full data is applied in the algorithm
   #' @export
   SGD = function(x,y,n,delta=1e-2,iteration=10){
     if(!is.array(x)) {x <- matrix(x,nrow=1); y <- matrix(y,nrow=1)}
@@ -405,11 +412,20 @@ NN <- R6Class("NN", list(
       for (i in 1:(n)){
         self$BP_reg(x[,(1+(i-1)*m):(i*m)],y[,(1+(i-1)*m):(i*m)],gam=delta)
       }
-      print("Epoche: ")
-      print(j)
     }
   },
 
+  #' @description
+  #' Calculating stochastic gradient descent for classification
+  #'
+  #' @param x A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param y A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param n a vector
+  #' @param delta A scalar between 0 and 1 that determines how much the weights change
+  #' @param iteration a scalar that represents the times the full data is applied in the algorithm
+  #' @export
   SGD_clas = function(x,y,n,delta=1e-2,iteration=10){
     if(!is.array(x)) {x <- matrix(x,nrow=1); y <- matrix(y,nrow=1)}
     for (j in 1:iteration){
@@ -433,10 +449,11 @@ NN <- R6Class("NN", list(
   #' @description
   #' Calculating gradient descent for classification
   #'
-  #' @param x A vector
-  #' @param y A vector
-  #' @param gam A vector
-  #' @param lambda A vector
+  #' @param x A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param y A vector or array with rows representing the input of the training
+  #'   data and columns representing the number of different training data
+  #' @param gam A scalar between 0 and 1 that determines how much the weights change
   #' @export
   BP_clas = function(x,y, gam = 1e-4){
     if(!is.array(x)) {
@@ -542,7 +559,6 @@ NN <- R6Class("NN", list(
           }
         }
       }
-      return(self$W)
     }
   }
 )

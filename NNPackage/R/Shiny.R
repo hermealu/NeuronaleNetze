@@ -1,3 +1,8 @@
+#' Shiny App
+#'
+#' Shows an example of the Neural Network in a shiny app
+#'
+#' @export
 show_shiny <- function(){
   x1 <- seq(0,2*pi, length.out = 100)
   y1 <- sin(x1) + runif(length(x1),min=-0.1,max=0.1)
@@ -13,7 +18,7 @@ show_shiny <- function(){
     sidebarLayout(
       sidebarPanel(
         radioButtons("art", "Art des lernens",
-                     choices=list("Gradient Descend"=1,"Stochatical Gradient Descend"=2,"Random Descend"=3),selected = 2),
+                     choices=list("Gradient Descend"=1,"Stochatical Gradient Descend"=2,"Random Descend"=3),selected = 3),
         uiOutput("trend_ui"),
         sliderInput("anzahl", "Anzahl hidden Layer",
                     1, 10, 3, step=1, sep=""),
@@ -31,13 +36,13 @@ show_shiny <- function(){
     output$trend_ui <- renderUI({
       if (input$art==2)
         sliderInput("batches", "Anzahl der Batches",
-                    1, 100, 3, step=1, sep="")
+                    1, 100, 10, step=1, sep="")
     })
     output$plot <- renderPlotly({
       a <- rep(input$breite,input$anzahl)
       print(a)
       N1 <- NN$new(length(a),c(1,a,1))
-      if (input$art == 3) N1$GD3(x1,y1,delta=0.01,iteration = input$iterations)
+      if (input$art == 3) N1$GD(x1,y1,delta=0.01,iteration = input$iterations)
       if (input$art == 1) for (i in 1:input$iterations) {N1$BP_reg(x1,y1,gam=0.01);print(i)}
       if (input$art == 2) N1$SGD(n = input$batches,x1,y1,delta=0.01,iteration = input$iterations)
       y3 <- N1$ffprop(x1)

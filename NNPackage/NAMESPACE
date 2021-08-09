@@ -3,7 +3,7 @@
 export(NN)
 export(del_sigmoid)
 export(del_tanh)
-export(id)
+export(show_shiny)
 export(sigmoid)
 export(softmax)
 export(tanh)
