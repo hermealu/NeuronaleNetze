@@ -131,7 +131,7 @@ Calculating feed forward propagation for classification with softmax
 \if{html}{\out{<a id="method-eval_till_layer"></a>}}
 \if{latex}{\out{\hypertarget{method-eval_till_layer}{}}}
 \subsection{Method \code{eval_till_layer()}}{
-Calculating feedworward propagation up to a certain layer Layer
+Calculating feedforward propagation up to a certain layer Layer
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$eval_till_layer(x = 1, Layer = 1)}\if{html}{\out{</div>}}
 }
@@ -150,7 +150,7 @@ Calculating feedworward propagation up to a certain layer Layer
 \if{html}{\out{<a id="method-eval_till_layer_z"></a>}}
 \if{latex}{\out{\hypertarget{method-eval_till_layer_z}{}}}
 \subsection{Method \code{eval_till_layer_z()}}{
-Calculating feedforward propagation up to a certain layer without activation function in last step
+Calculating feedforward propagation up to a certain layer without activation function in the last step
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NN$eval_till_layer_z(x = 1, Layer = 1)}\if{html}{\out{</div>}}
 }
@@ -181,7 +181,7 @@ Calculating gradient descent
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the input of the training
+\item{\code{y}}{A vector or array with rows representing the output of the training
 data and columns representing the number of different training data}
 
 \item{\code{iteration}}{a scalar that represents the times the full data is applied in the algorithm}
@@ -206,10 +206,10 @@ A Method, which calculates the Gradient Decent for regression for a neural netwo
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the input of the training
+\item{\code{y}}{A vector or array with rows representing the output of the training
 data and columns representing the number of different training data}
 
-\item{\code{gam}}{A scalar between zero and 1}
+\item{\code{gam}}{A scalar between zero and 1 that determines how much the weights change}
 }
 \if{html}{\out{</div>}}
 }
@@ -229,7 +229,7 @@ Calculating stochastic gradient descent
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the input of the training
+\item{\code{y}}{A vector or array with rows representing the output of the training
 data and columns representing the number of different training data}
 
 \item{\code{n}}{a vector}
@@ -256,7 +256,7 @@ Calculating stochastic gradient descent for classification
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the input of the training
+\item{\code{y}}{A vector or array with rows representing the output of the training
 data and columns representing the number of different training data}
 
 \item{\code{n}}{a vector}
@@ -283,7 +283,7 @@ Calculating gradient descent for classification
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the input of the training
+\item{\code{y}}{A vector or array with rows representing the output of the training
 data and columns representing the number of different training data}
 
 \item{\code{gam}}{A scalar between 0 and 1 that determines how much the weights change}
