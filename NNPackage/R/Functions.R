@@ -4,7 +4,7 @@
 #'
 #' @param NN A NN-Class Object
 #' @examples
-#' save_NN(NN_mnist)
+#' save_NN(NN$new(B=c(1,10,1)))
 #' @export
 save_NN <- function(NN){
   W_saved_neuralnetwork <-NN$W
@@ -25,7 +25,7 @@ save_NN <- function(NN){
 #' NN_mnist <- load_NN()
 #' @export
 load_NN <- function(){
-  devtools::load_all(".")
+  load("~/Documents/Uni/R/R-Projekt/R_project/NNPackage/R/sysdata.rda")
   N_loc <- NN$new(B=B_saved_neuralnetwork)
   N_loc$W <- W_saved_neuralnetwork
   N_loc$d <- d_saved_neuralnetwork

@@ -4,12 +4,13 @@
 \name{NNPackage-package}
 \alias{NNPackage}
 \alias{NNPackage-package}
-\title{NNPackage: What the Package Does (One Line, Title Case)}
+\title{NNPackage: A neural network package that can generate and optimize neural networks}
 \description{
-What the package does (one paragraph).
+With this package it is possible to generate neural networks with different layer depth and different neurons per layer.
+    Additionally the pacakge includes 3 different optimizers so that the neural network can be trained for a given data set.
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Mark Daniel Arndt \email{markdaniel.arndt@gmail.com}
 
 }
 \keyword{internal}

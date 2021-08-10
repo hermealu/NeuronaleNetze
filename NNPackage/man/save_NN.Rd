@@ -13,5 +13,5 @@ save_NN(NN)
 Saving the neural network including it's weights
 }
 \examples{
-save_NN(NN_mnist)
+save_NN(NN$new(B=c(1,10,1)))
 }

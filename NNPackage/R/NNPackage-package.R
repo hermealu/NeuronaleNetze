@@ -13,4 +13,5 @@
 #' @import plotly
 #' @import tibble
 #' @import ggplot2
+#' @import stats
 NULL
