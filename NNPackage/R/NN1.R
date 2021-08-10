@@ -54,11 +54,6 @@ NN <- R6Class("NN", list(
     }
     self$d[L+1] <- 0
     names(self$d) <- LETTERS[1:(L+1)]
-
-    #Erstellen des J -> braucht man hier aber wahrscheinlich nicht sondern erst in der Berechnung
-    for (i in (0:L)){
-      self$J <- self$J + norm(self$W[[i+1]],"F")
-    }
   },
 
   #' @description
@@ -103,7 +98,7 @@ NN <- R6Class("NN", list(
   #' @param x An array, which represents the input of the network
   #' @export
   # Feedwordward propagation - classification
-  ffprop_clas = function(x=1){
+  ffprop_clas = function(x=matrix(1)){
     stopifnot("x has to be an array!" = is.array(x))
     if (is.array(x)){
       y <- matrix(1,nrow=dim(x)[2],ncol=self$B[self$L+2])
@@ -204,7 +199,7 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the output of the training
+  #' @param y A vector or array with rows representing the onehotencoded output of the training
   #'   data and columns representing the number of different training data
   #' @param gam A scalar between zero and 1 that determines how much the weights change
   #' @export
@@ -343,7 +338,7 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the output of the training
+  #' @param y A vector or array with rows representing the onehotencoded output of the training
   #'   data and columns representing the number of different training data
   #' @param n a vector
   #' @param delta A scalar between 0 and 1 that determines how much the weights change
@@ -374,7 +369,7 @@ NN <- R6Class("NN", list(
   #'
   #' @param x A vector or array with rows representing the input of the training
   #'   data and columns representing the number of different training data
-  #' @param y A vector or array with rows representing the output of the training
+  #' @param y A vector or array with rows representing the onehotencoded output of the training
   #'   data and columns representing the number of different training data
   #' @param gam A scalar between 0 and 1 that determines how much the weights change
   #' @export
