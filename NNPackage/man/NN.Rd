@@ -23,8 +23,6 @@ Gradient Descends Methods
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-f}{\code{NN$f()}}
-\item \href{#method-del_f}{\code{NN$del_f()}}
 \item \href{#method-new}{\code{NN$new()}}
 \item \href{#method-ffprop}{\code{NN$ffprop()}}
 \item \href{#method-ffprop_clas}{\code{NN$ffprop_clas()}}
@@ -39,24 +37,6 @@ Gradient Descends Methods
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-f"></a>}}
-\if{latex}{\out{\hypertarget{method-f}{}}}
-\subsection{Method \code{f()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$f(x)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-del_f"></a>}}
-\if{latex}{\out{\hypertarget{method-del_f}{}}}
-\subsection{Method \code{del_f()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$del_f(x)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
@@ -68,7 +48,9 @@ Initializing a neural network
   W = c(1, 1, 1),
   d = c(1, 1, 0),
   min_gewicht = -2,
-  max_gewicht = 2
+  max_gewicht = 2,
+  func = sigmoid,
+  del_func = del_sigmoid
 )}\if{html}{\out{</div>}}
 }
 

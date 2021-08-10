@@ -18,10 +18,8 @@ NN <- R6Class("NN", list(
   B = c(1), #Breite der einzelnen Layer
   W = c(1,1), #Liste soll Länge der dim haben und Einträge sind Matrizen W
   d = c(1), #List der Affinen Vektoren
-  J = 0,
-  theta = c(1,1),
-  f = sigmoid,
-  del_f = del_sigmoid,
+  f = 1,
+  del_f = 1,
 
   #' @description
   #'
@@ -35,13 +33,14 @@ NN <- R6Class("NN", list(
   #' @param max_gewicht a scalar, which sets the maximal number that can appear in a weight matrix
   #' @return A R6 object, which contains the parameters of a neural network and methods for its optimization
   #' @export
-  initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1), d=c(1,1,0), min_gewicht=-2, max_gewicht = 2 ) {
+  initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1), d=c(1,1,0), min_gewicht=-2, max_gewicht = 2, func = sigmoid, del_func = del_sigmoid) {
     L <- length(B)-2
     stopifnot(L >= 1)
     self$W <- vector(mode="list",length=L+1)
     self$L <- L
     self$B <- B
-
+    self$f <- func
+    self$del_f <- del_func
 
     #Erstellen der Matrizen W
     for (i in (0:L)){
