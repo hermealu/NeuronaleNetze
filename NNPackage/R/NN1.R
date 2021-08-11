@@ -25,12 +25,14 @@ NN <- R6Class("NN", list(
   #'
   #' Initializing a neural network
   #'
-  #' @param L a scalar, which refers to the number of hidden layers
-  #' @param B a atomic vector, which contains the width of the input, the hidden layers and the output
-  #' @param W a list with length L+1, which contains matrix-inputs of the weight matrices of the neural network
-  #' @param d a list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network
-  #' @param min_gewicht a scalar, which sets the minimal number that can appear in a weight matrix
-  #' @param max_gewicht a scalar, which sets the maximal number that can appear in a weight matrix
+  #' @param L A scalar, which refers to the number of hidden layers
+  #' @param B An atomic vector, which contains the width of the input, the hidden layers and the output
+  #' @param W A list with length L+1, which contains matrix-inputs of the weight matrices of the neural network
+  #' @param d A list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network
+  #' @param min_gewicht A scalar, which sets the minimal number that can appear in a weight matrix
+  #' @param max_gewicht A scalar, which sets the maximal number that can appear in a weight matrix
+  #' @param func A function, which represents the activation function
+  #' @param del_func A function, which represents the derivative of the activation function
   #' @return A R6 object, which contains the parameters of a neural network and methods for its optimization
   #' @export
   initialize = function(L = 1, B = c(1,1,1), W = c(1,1,1), d=c(1,1,0), min_gewicht=-2, max_gewicht = 2, func = sigmoid, del_func = del_sigmoid) {
@@ -165,7 +167,7 @@ NN <- R6Class("NN", list(
   #' @param y A vector or array with rows representing the output of the training
   #'   data and columns representing the number of different training data
   #' @param delta A scalar between 0 and 1 that determines how much the weights change
-  #' @param iteration a scalar that represents the times the full data is applied in the algorithm
+  #' @param iteration A scalar that represents the times the full data is applied in the algorithm
   #' @export
   GD = function(x,y,iteration=10,delta=0.02){
     for (j in 1:iteration){
@@ -313,9 +315,9 @@ NN <- R6Class("NN", list(
   #'   data and columns representing the number of different training data
   #' @param y A vector or array with rows representing the output of the training
   #'   data and columns representing the number of different training data
-  #' @param n a vector
+  #' @param n A scalar that determines the number of batches
   #' @param delta A scalar between 0 and 1 that determines how much the weights change
-  #' @param iteration a scalar that represents the times the full data is applied in the algorithm
+  #' @param iteration A scalar that represents the times the full data is applied in the algorithm
   #' @export
   SGD = function(x,y,n,delta=1e-2,iteration=10){
     if(!is.array(x)) {x <- matrix(x,nrow=1); y <- matrix(y,nrow=1)}
@@ -340,9 +342,9 @@ NN <- R6Class("NN", list(
   #'   data and columns representing the number of different training data
   #' @param y A vector or array with rows representing the onehotencoded output of the training
   #'   data and columns representing the number of different training data
-  #' @param n a vector
+  #' @param n A scalar that determines the number of batches
   #' @param delta A scalar between 0 and 1 that determines how much the weights change
-  #' @param iteration a scalar that represents the times the full data is applied in the algorithm
+  #' @param iteration A scalar that represents the times the full data is applied in the algorithm
   #' @export
   SGD_clas = function(x,y,n,delta=1e-2,iteration=10){
     if(!is.array(x)) {x <- matrix(x,nrow=1); y <- matrix(y,nrow=1)}
