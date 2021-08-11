@@ -6,7 +6,7 @@
 #' @examples
 #' save_NN(NN$new(B=c(1,10,1)))
 #' @export
-save_NN <- function(NN, path = "R/sysdata.rda"){
+save_NN <- function(NN){
   W_saved_neuralnetwork <-NN$W
   d_saved_neuralnetwork <- NN$d
   B_saved_neuralnetwork <- NN$B
