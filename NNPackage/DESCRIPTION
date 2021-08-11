@@ -2,10 +2,11 @@ Package: NNPackage
 Title: A neural network package that can generate and optimize neural networks
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Mark Daniel",
-           family = "Arndt",
-           role = c("aut", "cre"),
-           email = "markdaniel.arndt@gmail.com")
+    c(
+    person(given = "Mark Daniel", family = "Arndt", role = "aut"),
+    person(given = "Mark Daniel", family = "Arndt", email = "markdaniel.arndt@gmail.com", role = "cre"),
+    person(given = "Johanna", "Biereder", role = "aut"),
+    person(given = "Johanna", "Biereder", email = "biereder@stud.uni-heidelberg.de", role = "cre"))
 Description: With this package it is possible to generate neural networks with different layer depth and different neurons per layer.
     Additionally the pacakge includes 3 different optimizers so that the neural network can be trained for a given data set.
 License: MIT + file LICENSE

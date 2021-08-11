@@ -12,5 +12,11 @@ With this package it is possible to generate neural networks with different laye
 \author{
 \strong{Maintainer}: Mark Daniel Arndt \email{markdaniel.arndt@gmail.com}
 
+Authors:
+\itemize{
+  \item Mark Daniel Arndt
+  \item Johanna Biereder
+}
+
 }
 \keyword{internal}
