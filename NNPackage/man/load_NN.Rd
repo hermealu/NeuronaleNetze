@@ -4,11 +4,11 @@
 \alias{load_NN}
 \title{Load the neural network}
 \usage{
-load_NN()
+load_NN(path = "R/sysdata.rda")
+}
+\arguments{
+\item{path}{path from working directory to the saved file which is in NNPackage/R/dateiname}
 }
 \description{
 Loading in the saved neural network including it's weights
-}
-\examples{
-NN_mnist <- load_NN()
 }

@@ -18,7 +18,28 @@ Gradient Descends Methods
 
 \item{W}{weight matrices}
 
-\item{d}{width vector} }
+\item{d}{width vector}
+
+\item{f}{activation function}
+
+\item{del_f}{derivative of the activation function} }
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{L}}{A scalar, which refers to the number of hidden layers}
+
+\item{\code{B}}{An atomic vector, which contains the width of the input, the hidden layers and the output}
+
+\item{\code{W}}{A list with length L+1, which contains matrix-inputs of the weight matrices of the neural network}
+
+\item{\code{d}}{A list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network}
+
+\item{\code{f}}{A function, which represents the activation function}
+
+\item{\code{del_f}}{A function, which represents the derivative of the activation function}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -57,17 +78,21 @@ Initializing a neural network
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{L}}{a scalar, which refers to the number of hidden layers}
+\item{\code{L}}{A scalar, which refers to the number of hidden layers}
 
-\item{\code{B}}{a atomic vector, which contains the width of the input, the hidden layers and the output}
+\item{\code{B}}{An atomic vector, which contains the width of the input, the hidden layers and the output}
 
-\item{\code{W}}{a list with length L+1, which contains matrix-inputs of the weight matrices of the neural network}
+\item{\code{W}}{A list with length L+1, which contains matrix-inputs of the weight matrices of the neural network}
 
-\item{\code{d}}{a list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network}
+\item{\code{d}}{A list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network}
 
-\item{\code{min_gewicht}}{a scalar, which sets the minimal number that can appear in a weight matrix}
+\item{\code{min_gewicht}}{A scalar, which sets the minimal number that can appear in a weight matrix}
 
-\item{\code{max_gewicht}}{a scalar, which sets the maximal number that can appear in a weight matrix}
+\item{\code{max_gewicht}}{A scalar, which sets the maximal number that can appear in a weight matrix}
+
+\item{\code{func}}{A function, which represents the activation function}
+
+\item{\code{del_func}}{A function, which represents the derivative of the activation function}
 }
 \if{html}{\out{</div>}}
 }
@@ -166,7 +191,7 @@ data and columns representing the number of different training data}
 \item{\code{y}}{A vector or array with rows representing the output of the training
 data and columns representing the number of different training data}
 
-\item{\code{iteration}}{a scalar that represents the times the full data is applied in the algorithm}
+\item{\code{iteration}}{A scalar that represents the times the full data is applied in the algorithm}
 
 \item{\code{delta}}{A scalar between 0 and 1 that determines how much the weights change}
 }
@@ -214,11 +239,11 @@ data and columns representing the number of different training data}
 \item{\code{y}}{A vector or array with rows representing the output of the training
 data and columns representing the number of different training data}
 
-\item{\code{n}}{a vector}
+\item{\code{n}}{A scalar that determines the number of batches}
 
 \item{\code{delta}}{A scalar between 0 and 1 that determines how much the weights change}
 
-\item{\code{iteration}}{a scalar that represents the times the full data is applied in the algorithm}
+\item{\code{iteration}}{A scalar that represents the times the full data is applied in the algorithm}
 }
 \if{html}{\out{</div>}}
 }
@@ -241,11 +266,11 @@ data and columns representing the number of different training data}
 \item{\code{y}}{A vector or array with rows representing the onehotencoded output of the training
 data and columns representing the number of different training data}
 
-\item{\code{n}}{a vector}
+\item{\code{n}}{A scalar that determines the number of batches}
 
 \item{\code{delta}}{A scalar between 0 and 1 that determines how much the weights change}
 
-\item{\code{iteration}}{a scalar that represents the times the full data is applied in the algorithm}
+\item{\code{iteration}}{A scalar that represents the times the full data is applied in the algorithm}
 }
 \if{html}{\out{</div>}}
 }

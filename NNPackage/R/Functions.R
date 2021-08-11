@@ -6,7 +6,7 @@
 #' @examples
 #' save_NN(NN$new(B=c(1,10,1)))
 #' @export
-save_NN <- function(NN){
+save_NN <- function(NN, path = "R/sysdata.rda"){
   W_saved_neuralnetwork <-NN$W
   d_saved_neuralnetwork <- NN$d
   B_saved_neuralnetwork <- NN$B
@@ -20,13 +20,11 @@ save_NN <- function(NN){
 #' Load the neural network
 #'
 #' Loading in the saved neural network including it's weights
-#'
-#' @examples
-#' NN_mnist <- load_NN()
+#' @param path path from working directory to the saved file which is in NNPackage/R/dateiname
 #' @export
-load_NN <- function(){
+load_NN <- function(path = "R/sysdata.rda"){
   #devtools::load_all(".")
-  load("R/sysdata.rda")
+  load(path)
   N_loc <- NN$new(B=B_saved_neuralnetwork)
   N_loc$W <- W_saved_neuralnetwork
   N_loc$d <- d_saved_neuralnetwork

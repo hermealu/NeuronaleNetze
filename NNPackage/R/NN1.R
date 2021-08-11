@@ -9,16 +9,31 @@
 #'
 #' \item{W}{weight matrices}
 #'
-#' \item{d}{width vector} }
+#' \item{d}{width vector}
+#'
+#' \item{f}{activation function}
+#'
+#' \item{del_f}{derivative of the activation function} }
 #' @name NN
 #' @rdname NN
 #' @exportClass NN
 NN <- R6Class("NN", list(
+  #' @field L A scalar, which refers to the number of hidden layers
   L = 1, #Anzahl der Hidden Layer
+
+  #' @field B An atomic vector, which contains the width of the input, the hidden layers and the output
   B = c(1), #Breite der einzelnen Layer
+
+  #' @field W A list with length L+1, which contains matrix-inputs of the weight matrices of the neural network
   W = c(1,1), #Liste soll Länge der dim haben und Einträge sind Matrizen W
+
+  #' @field d A list with length L+1, which contains atomic vectors. They represent the affine vectors of the neural network
   d = c(1), #List der Affinen Vektoren
+
+  #' @field f A function, which represents the activation function
   f = 1,
+
+  #' @field del_f A function, which represents the derivative of the activation function
   del_f = 1,
 
   #' @description
@@ -80,7 +95,7 @@ NN <- R6Class("NN", list(
       }
       return(y)
     }
-
+    if(self$B[1] > 1){stopifnot("If B[1] is bigger than one, x has to be a matrix" = length(x)==1)}
     for (j in (1:length(x))){
       h <- x[j]
       if (self$L >= 1){
@@ -208,6 +223,7 @@ NN <- R6Class("NN", list(
   # Realization of backwardpropagation - regression
   BP_reg = function(x,y, gam = 1e-4){
     if(!is.array(x)) {
+      if(self$B[1] > 1){stopifnot("If B[1] is bigger than one, x has to be a matrix" = length(x)==1)}
       x <- matrix(x, nrow = 1)
     }
     if(is.array(x)){
@@ -377,6 +393,7 @@ NN <- R6Class("NN", list(
   #' @export
   BP_clas = function(x,y, gam = 1e-4){
     if(!is.array(x)) {
+      if(self$B[1] > 1){stopifnot("If B[1] is bigger than one, x has to be a matrix" = length(x)==1)}
       x <- matrix(x, nrow = 1)
     }
 

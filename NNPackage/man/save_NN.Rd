@@ -4,7 +4,7 @@
 \alias{save_NN}
 \title{Save the neural network}
 \usage{
-save_NN(NN)
+save_NN(NN, path = "R/sysdata.rda")
 }
 \arguments{
 \item{NN}{A NN-Class Object}
