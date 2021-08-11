@@ -25,8 +25,8 @@ save_NN <- function(NN){
 #' NN_mnist <- load_NN()
 #' @export
 load_NN <- function(){
-  load_all(".")
-  #load("~/Documents/Uni/R/R-Projekt/R_project/NNPackage/R/sysdata.rda")
+  #devtools::load_all(".")
+  load("R/sysdata.rda")
   N_loc <- NN$new(B=B_saved_neuralnetwork)
   N_loc$W <- W_saved_neuralnetwork
   N_loc$d <- d_saved_neuralnetwork

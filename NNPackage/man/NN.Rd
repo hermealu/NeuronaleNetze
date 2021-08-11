@@ -98,7 +98,7 @@ Calculate feedforward propagation for regression of a neural network
 \subsection{Method \code{ffprop_clas()}}{
 Calculating feed forward propagation for classification with softmax
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NN$ffprop_clas(x = 1)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NN$ffprop_clas(x = matrix(1))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -188,7 +188,7 @@ A Method, which calculates the Gradient Decent for regression for a neural netwo
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the output of the training
+\item{\code{y}}{A vector or array with rows representing the onehotencoded output of the training
 data and columns representing the number of different training data}
 
 \item{\code{gam}}{A scalar between zero and 1 that determines how much the weights change}
@@ -238,7 +238,7 @@ Calculating stochastic gradient descent for classification
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the output of the training
+\item{\code{y}}{A vector or array with rows representing the onehotencoded output of the training
 data and columns representing the number of different training data}
 
 \item{\code{n}}{a vector}
@@ -265,7 +265,7 @@ Calculating gradient descent for classification
 \item{\code{x}}{A vector or array with rows representing the input of the training
 data and columns representing the number of different training data}
 
-\item{\code{y}}{A vector or array with rows representing the output of the training
+\item{\code{y}}{A vector or array with rows representing the onehotencoded output of the training
 data and columns representing the number of different training data}
 
 \item{\code{gam}}{A scalar between 0 and 1 that determines how much the weights change}
